@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,13 +64,15 @@ fun WelcomeScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_farmer),
-                            contentDescription = "Farmer Avatar",
-                            modifier = Modifier.size(90.dp)
+                            painter = painterResource(id = R.drawable.ic_grain_logo),
+                            contentDescription = "GrainGuardian Official Brand Logo",
+                            modifier = Modifier
+                                .size(105.dp)
+                                .clip(RoundedCornerShape(20.dp))
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = if (isTelugu) "రైతు మిత్రుడు" else "Farmer First Intelligence",
+                            text = if (isTelugu) "రైతు రక్షకుడు • స్మార్ట్ వ్యవసాయం" else "Agri · Tech · Guardians",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = GrainDarkGreen

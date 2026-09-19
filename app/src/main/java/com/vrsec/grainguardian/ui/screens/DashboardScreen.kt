@@ -1,5 +1,6 @@
 package com.vrsec.grainguardian.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.painterResource
+import com.vrsec.grainguardian.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CheckCircle
@@ -109,18 +112,28 @@ fun DashboardScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = if (isTelugu) "శుభోదయం, రైతు సోదరా!" else "Good Morning, Farmer!",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GrainTextPrimary
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_grain_logo),
+                        contentDescription = "GrainGuardian Brand Logo",
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(12.dp))
                     )
-                    Text(
-                        text = if (isTelugu) "వరి నిల్వ ఆరోగ్య సమాచారం" else "Paddy Storage Health Intelligence",
-                        fontSize = 13.sp,
-                        color = GrainTextSecondary
-                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = if (isTelugu) "శుభోదయం, రైతు సోదరా!" else "Good Morning, Farmer!",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainTextPrimary
+                        )
+                        Text(
+                            text = if (isTelugu) "వరి నిల్వ ఆరోగ్య సమాచారం" else "Paddy Storage Health Intelligence",
+                            fontSize = 12.sp,
+                            color = GrainTextSecondary
+                        )
+                    }
                 }
 
                 // Probe Connectivity Chip

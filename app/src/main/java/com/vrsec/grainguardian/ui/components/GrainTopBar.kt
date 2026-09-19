@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.components
+package com.vrsec.grainguardian.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,6 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
+import com.vrsec.grainguardian.R
 import com.vrsec.grainguardian.ui.theme.GrainDangerRed
 import com.vrsec.grainguardian.ui.theme.GrainDarkGreen
 import com.vrsec.grainguardian.ui.theme.GrainPrimaryGreen
@@ -68,6 +72,16 @@ fun GrainTopBar(
         } else {
             Spacer(modifier = Modifier.width(16.dp))
         }
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_grain_logo),
+            contentDescription = "GrainGuardian Brand Logo",
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
 
         Text(
             text = title,

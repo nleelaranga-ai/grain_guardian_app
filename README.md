@@ -1,7 +1,10 @@
 <div align="center">
 
+<img src="./assets/logo.png" alt="GrainGuardian Official Brand Logo" width="220" style="border-radius: 28px;" />
+
 # 🌾 GrainGuardian (పంట రక్షకుడు)
 ### *Smart Paddy Post-Harvest Readiness, 3-Depth Thermal Stratification & Storage Health Intelligence System*
+**AGRI · TECH · GUARDIANS**
 
 [![Build Status](https://img.shields.io/badge/Build-Success-10b981?style=for-the-badge&logo=android&logoColor=white)](https://github.com/nleelaranga-ai/grain_guardian_app)
 [![Platform](https://img.shields.io/badge/Android-8.0+_(API_26+)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)

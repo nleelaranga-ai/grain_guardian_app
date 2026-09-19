@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -14,8 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,10 +64,11 @@ fun SplashScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_grain_logo),
-                contentDescription = "GrainGuardian Logo",
+                contentDescription = "GrainGuardian Official Brand Logo",
                 modifier = Modifier
-                    .size(110.dp)
+                    .size(140.dp)
                     .scale(scale)
+                    .clip(RoundedCornerShape(28.dp))
             )
 
             Spacer(modifier = Modifier.height(20.dp))
