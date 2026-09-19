@@ -1,0 +1,1 @@
+﻿-keep class com.vrsec.grainguardian.data.model.** { *; }

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">గ్రెయిన్ గార్డియన్</string>
+    <string name="app_tagline">కోత అనంతర సంసిద్ధత మరియు నిల్వ ఆరోగ్య సమాచారం</string>
+    <string name="welcome_title">గ్రెయిన్ గార్డియన్‌కు స్వాగతం</string>
+    <string name="continue_btn">కొనసాగించండి</string>
+    <string name="get_started">ప్రారంభించండి</string>
+    <string name="select_language">భాషను ఎంచుకోండి</string>
+    <string name="select_crop">పంటను ఎంచుకోండి</string>
+    <string name="drying_check">ఎండబెట్టడం తనిఖీ</string>
+    <string name="storage_check">నిల్వ ఆరోగ్యం తనిఖీ</string>
+</resources>

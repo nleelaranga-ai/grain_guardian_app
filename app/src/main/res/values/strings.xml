@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GrainGuardian</string>
+    <string name="app_tagline">Post-Harvest Readiness &amp; Storage Health Intelligence</string>
+    <string name="welcome_title">Welcome to GrainGuardian</string>
+    <string name="continue_btn">Continue</string>
+    <string name="get_started">Get Started</string>
+    <string name="select_language">Select Language</string>
+    <string name="select_crop">Select Crop</string>
+    <string name="drying_check">Drying Check</string>
+    <string name="storage_check">Storage Check</string>
+</resources>
