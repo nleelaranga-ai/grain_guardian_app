@@ -365,4 +365,8 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
     suspend fun exportInspectionsToCsv(context: Context): File {
         return repository.exportInspectionsToCsv(context)
     }
+
+    suspend fun exportInspectionToPdf(context: Context, inspection: GrainInspectionEntity): File {
+        return repository.exportInspectionToPdf(context, inspection)
+    }
 }

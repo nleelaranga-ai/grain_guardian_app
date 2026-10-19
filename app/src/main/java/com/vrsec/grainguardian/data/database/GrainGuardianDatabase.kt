@@ -44,7 +44,7 @@ abstract class GrainGuardianDatabase : RoomDatabase() {
             }
         }
 
-        fun getDatabase(context: Context, scope: CoroutineScope): GrainGuardianDatabase {
+        fun getDatabase(context: Context, scope: CoroutineScope? = null): GrainGuardianDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,

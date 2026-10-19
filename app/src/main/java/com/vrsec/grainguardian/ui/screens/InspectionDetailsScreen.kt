@@ -21,6 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.launch
+import java.io.File
+import com.vrsec.grainguardian.ui.theme.GrainPrimaryGreen
+import com.vrsec.grainguardian.ui.theme.GrainDarkGreen
 import com.vrsec.grainguardian.data.model.GrainInspectionEntity
 import com.vrsec.grainguardian.domain.localization.LocalizationManager
 import com.vrsec.grainguardian.ui.components.GrainTopBar
@@ -38,8 +49,12 @@ fun InspectionDetailsScreen(
     viewModel: GrainViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val isTelugu = LocalizationManager.isTelugu()
     var inspection by remember { mutableStateOf<GrainInspectionEntity?>(null) }
+    var exportPdfMessage by remember { mutableStateOf<String?>(null) }
+    var isExporting by remember { mutableStateOf(false) }
 
     LaunchedEffect(inspectionId) {
         inspection = viewModel.getInspectionById(inspectionId)
@@ -195,21 +210,185 @@ fun InspectionDetailsScreen(
                 colors = CardDefaults.cardColors(containerColor = GrainSurface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Row(
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "తుది ఫలితం" else "Overall Result",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainTextPrimary
+                        )
+                        StatusBadge(status = inspection?.status ?: "SAFE")
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (isTelugu) "క్షీణత ప్రమాద స్కోరు (BDRS)" else "Biological Risk (BDRS)",
+                            fontSize = 13.sp,
+                            color = GrainTextSecondary
+                        )
+                        Text(
+                            text = "${inspection?.riskScore ?: 0} / 100",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainTextPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (isTelugu) "ప్రధాన ప్రమాదం" else "Dominant Risk",
+                            fontSize = 13.sp,
+                            color = GrainTextSecondary
+                        )
+                        Text(
+                            text = inspection?.dominantRisk ?: "None",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = GrainTextPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (isTelugu) "క్లౌడ్ సింక్ స్థితి" else "Cloud Sync",
+                            fontSize = 13.sp,
+                            color = GrainTextSecondary
+                        )
+                        Text(
+                            text = inspection?.syncState ?: "LOCAL",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (inspection?.syncState == "CONFIRMED") GrainDarkGreen else GrainTextSecondary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Actionable Recommendations Card
+            val recList = inspection?.recommendationsJson?.split("|")?.filter { it.isNotBlank() } ?: emptyList()
+            if (recList.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GrainSurface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Text(
+                            text = if (isTelugu) "రైతు చర్యలు & సిఫార్సులు" else "Recommended Actions",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainTextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        recList.forEach { rec ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Text(
+                                    text = "• ",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GrainPrimaryGreen
+                                )
+                                Text(
+                                    text = rec.trim(),
+                                    fontSize = 13.sp,
+                                    color = GrainTextPrimary,
+                                    lineHeight = 18.sp
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(18.dp))
+            }
+
+            // PDF Certificate Export Section
+            exportPdfMessage?.let { msg ->
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xFFF0FDF4),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(18.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(bottom = 12.dp)
                 ) {
                     Text(
-                        text = if (isTelugu) "తుది ఫలితం" else "Overall Result",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GrainTextPrimary
+                        text = msg,
+                        fontSize = 12.sp,
+                        color = GrainDarkGreen,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(12.dp)
                     )
-                    StatusBadge(status = inspection?.status ?: "SAFE")
                 }
+            }
+
+            Button(
+                onClick = {
+                    val currentInsp = inspection ?: return@Button
+                    isExporting = true
+                    coroutineScope.launch {
+                        try {
+                            val pdfFile = viewModel.exportInspectionToPdf(context, currentInsp)
+                            exportPdfMessage = if (isTelugu)
+                                "✓ నాణ్యతా పత్రం PDF గా సేవ్ చేయబడింది: ${pdfFile.name}"
+                                else "✓ Quality Certificate generated: ${pdfFile.name}"
+                        } catch (e: Exception) {
+                            exportPdfMessage = "PDF generation failed: ${e.message}"
+                        } finally {
+                            isExporting = false
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GrainPrimaryGreen),
+                enabled = inspection != null && !isExporting
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PictureAsPdf,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isExporting) {
+                        if (isTelugu) "పీడీఎఫ్ రూపొందిస్తోంది..." else "Generating Certificate..."
+                    } else {
+                        if (isTelugu) "నాణ్యతా పత్రం (PDF సర్టిఫికేట్)" else "Export Quality Certificate (PDF)"
+                    },
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }

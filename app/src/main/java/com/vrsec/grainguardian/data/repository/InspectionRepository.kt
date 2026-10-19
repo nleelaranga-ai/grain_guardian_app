@@ -202,4 +202,8 @@ class InspectionRepository(
         }
         file
     }
+
+    suspend fun exportInspectionToPdf(context: Context, inspection: GrainInspectionEntity): File = withContext(Dispatchers.IO) {
+        com.vrsec.grainguardian.domain.export.PdfReportGenerator.generateCertificate(context, inspection)
+    }
 }

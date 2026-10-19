@@ -48,6 +48,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -77,6 +80,9 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
+    // WorkManager (Background Storage Monitoring & Push Alerts)
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

@@ -22,6 +22,9 @@ interface GrainInspectionDao {
     @Query("SELECT * FROM inspections ORDER BY timestamp DESC LIMIT 1")
     fun getLatestInspection(): Flow<GrainInspectionEntity?>
 
+    @Query("SELECT * FROM inspections ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLatestInspectionDirect(): GrainInspectionEntity?
+
     @Query("SELECT COUNT(*) FROM inspections WHERE timestamp BETWEEN :startTime AND :endTime")
     suspend fun countInspectionsInRange(startTime: Long, endTime: Long): Int
 

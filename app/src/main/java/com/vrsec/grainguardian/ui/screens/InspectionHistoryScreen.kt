@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -98,34 +99,67 @@ fun InspectionHistoryScreen(
                     fontWeight = FontWeight.SemiBold,
                     color = GrainTextSecondary
                 )
-                OutlinedButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            try {
-                                val file = viewModel.exportInspectionsToCsv(context)
-                                exportMessage = if (isTelugu) "CSV గా ఎగుమతి చేయబడింది (${file.name})" else "Exported to ${file.name}"
-                            } catch (e: Exception) {
-                                exportMessage = "Export failed: ${e.message}"
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                try {
+                                    val file = viewModel.exportInspectionsToCsv(context)
+                                    exportMessage = if (isTelugu) "CSV గా ఎగుమతి చేయబడింది (${file.name})" else "Exported to ${file.name}"
+                                } catch (e: Exception) {
+                                    exportMessage = "Export failed: ${e.message}"
+                                }
                             }
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                    enabled = currentList.isNotEmpty()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FileDownload,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = GrainPrimaryGreen
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (isTelugu) "CSV ఎగుమతి" else "Export CSV",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GrainPrimaryGreen
-                    )
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        enabled = currentList.isNotEmpty()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FileDownload,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                            tint = GrainPrimaryGreen
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isTelugu) "CSV" else "CSV",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainPrimaryGreen
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val latest = currentList.firstOrNull() ?: return@OutlinedButton
+                            coroutineScope.launch {
+                                try {
+                                    val file = viewModel.exportInspectionToPdf(context, latest)
+                                    exportMessage = if (isTelugu) "తాజా పత్రం PDF గా ఎగుమతి అయింది (${file.name})" else "PDF Certificate exported (${file.name})"
+                                } catch (e: Exception) {
+                                    exportMessage = "Export failed: ${e.message}"
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        enabled = currentList.isNotEmpty()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PictureAsPdf,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                            tint = GrainDarkGreen
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isTelugu) "PDF" else "PDF",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainDarkGreen
+                        )
+                    }
                 }
             }
 

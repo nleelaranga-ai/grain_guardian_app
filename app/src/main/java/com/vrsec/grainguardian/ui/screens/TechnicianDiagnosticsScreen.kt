@@ -38,6 +38,7 @@ fun TechnicianDiagnosticsScreen(
     val deviceInfo by viewModel.deviceInfo.collectAsState()
     val isSandbox by viewModel.isDeveloperSandboxEnabled.collectAsState()
     var diagnosticFeedback by remember { mutableStateOf<String?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -229,6 +230,31 @@ fun TechnicianDiagnosticsScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            com.vrsec.grainguardian.worker.StorageHealthCheckWorker.triggerImmediateCheck(context)
+                            diagnosticFeedback = if (isTelugu) "వర్క్‌మేనేజర్ నిల్వ ఆరోగ్య తనిఖీ ప్రారంభించబడింది" else "Storage Health WorkManager triggered immediately"
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = GrainPrimaryGreen
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isTelugu) "నిల్వ ఆరోగ్య తనిఖీని ప్రారంభించు (వర్క్‌మేనేజర్)" else "Trigger Background Health Worker",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainPrimaryGreen
+                        )
                     }
                 }
             }

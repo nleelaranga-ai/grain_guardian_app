@@ -172,6 +172,36 @@ fun DryingResultScreen(
                         )
                     }
                 }
+
+                if (!isSafe && decision != null) {
+                    val excessMoisture = kotlin.math.max(0f, decision!!.moisture - 13.0f)
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = if (isTelugu) "☀️ ఎండబెట్టడం & గాలి ప్రసరణ సలహా" else "☀️ Sun-Drying & Aeration Protocol",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF92400E)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (isTelugu)
+                                    "• తగ్గించాల్సిన అదనపు తేమ: +${String.format("%.1f", excessMoisture)}% (సురక్షిత లక్ష్యం: 13.0%)\n• కళ్ళంలో 4–5 సెం.మీ (2 అంగుళాలు) మందంలో పరచండి\n• ప్రతి 1.5–2 గంటలకు ధాన్యాన్ని తిరగేయండి\n• గాలిలో తేమ (RH) 70% కంటే తక్కువ ఉన్నప్పుడు మాత్రమే ఆరబెట్టండి"
+                                    else
+                                    "• Moisture to evaporate: +${String.format("%.1f", excessMoisture)}% (Safe target: 13.0%)\n• Spread layer thickness: 4–5 cm (2 inches)\n• Turn grain pile every 1.5–2 hours in sunlight\n• Aerate only when ambient RH < 70% to prevent re-absorption",
+                                fontSize = 12.sp,
+                                color = Color(0xFF78350F),
+                                lineHeight = 17.sp
+                            )
+                        }
+                    }
+                }
             }
 
             Column(
