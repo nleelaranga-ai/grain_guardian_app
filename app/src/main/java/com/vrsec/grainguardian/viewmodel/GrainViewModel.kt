@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vrsec.grainguardian.data.bluetooth.BleConnectionState
 import com.vrsec.grainguardian.data.bluetooth.ProbeSensorData
+import com.vrsec.grainguardian.data.bluetooth.DeviceInfo
+import com.vrsec.grainguardian.data.bluetooth.SyncStatus
+import com.vrsec.grainguardian.data.cloud.CloudSyncState
 import com.vrsec.grainguardian.data.model.AssessmentMode
 import com.vrsec.grainguardian.data.model.CropType
 import com.vrsec.grainguardian.data.model.DeviceStatus
@@ -45,6 +48,9 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
     val bleConnectionState: StateFlow<BleConnectionState> = repository.bleConnectionState
     val liveSensorData: StateFlow<ProbeSensorData> = repository.liveSensorData
     val isDeveloperSandboxEnabled: StateFlow<Boolean> = repository.isDeveloperSandboxEnabled
+    val deviceInfo: StateFlow<DeviceInfo?> = repository.deviceInfo
+    val syncStatus: StateFlow<SyncStatus> = repository.syncStatus
+    val cloudSyncState: StateFlow<CloudSyncState> = repository.cloudSyncState
 
     // Derived device status
     val deviceStatus: StateFlow<DeviceStatus> = combine(
@@ -148,6 +154,10 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
         _selectedMode.value = AssessmentMode.STORAGE_HEALTH
     }
 
+    fun hasBlePermissions(): Boolean {
+        return repository.bleManager.hasPermissions()
+    }
+
     fun scanForDevices() {
         repository.bleManager.startScan()
     }
@@ -214,10 +224,34 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
             val finalSensor = repository.liveSensorData.value
             val isDrying = _selectedMode.value == AssessmentMode.DRYING_READINESS
 
-            val measuredMoisture = if (finalSensor.moisture > 0f) finalSensor.moisture else 13.2f
-            val measuredT1 = if (finalSensor.t1Top > 0f) finalSensor.t1Top else 29.0f
-            val measuredT2 = if (finalSensor.t2Middle > 0f) finalSensor.t2Middle else 30.5f
-            val measuredT3 = if (finalSensor.t3Bottom > 0f) finalSensor.t3Bottom else 31.2f
+            // CRITICAL SAFETY CHECK: Never issue a safe verdict from missing or invalid moisture data
+            if (finalSensor.moisture <= 0f) {
+                _measurementState.value = MeasurementState.Error(
+                    messageEn = "Moisture sensor disconnected or invalid reading. Cannot issue safety verdict.",
+                    messageTe = "తేమ సెన్సార్ కనెక్ట్ కాలేదు లేదా చెల్లని రీడింగ్ వచ్చింది. భద్రతా ఫలితాన్ని లెక్కించలేము."
+                )
+                _measurementPhase.value = if (LocalizationManager.isTeluguRaw()) 
+                    "లోపం: తేమ సెన్సార్ రీడింగ్ రాలేదు" 
+                    else "Error: Moisture sensor reading missing"
+                return@launch
+            }
+
+            // CRITICAL SAFETY CHECK: Storage check requires valid multi-depth temperature readings
+            if (!isDrying && (finalSensor.t1Top <= 0f || finalSensor.t2Middle <= 0f || finalSensor.t3Bottom <= 0f)) {
+                _measurementState.value = MeasurementState.Error(
+                    messageEn = "Multi-depth temperature probes disconnected. Cannot evaluate storage hotspot risk.",
+                    messageTe = "ఉష్ణోగ్రత సెన్సార్లు కనెక్ట్ కాలేదు. నిల్వ హాట్‌స్పాట్ ప్రమాదాన్ని అంచనా వేయలేము."
+                )
+                _measurementPhase.value = if (LocalizationManager.isTeluguRaw()) 
+                    "లోపం: ఉష్ణోగ్రత సెన్సార్ రీడింగ్ రాలేదు" 
+                    else "Error: Temperature probe readings missing"
+                return@launch
+            }
+
+            val measuredMoisture = finalSensor.moisture
+            val measuredT1 = finalSensor.t1Top
+            val measuredT2 = finalSensor.t2Middle
+            val measuredT3 = finalSensor.t3Bottom
             val measuredHumidity = if (finalSensor.ambientHumidity > 0f) finalSensor.ambientHumidity else 65.0f
 
             _measurementState.value = MeasurementState.ComputingDecision
@@ -284,6 +318,30 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
     fun clearAllHistory() {
         viewModelScope.launch {
             repository.clearAllHistory()
+        }
+    }
+
+    fun resetMeasurementState() {
+        _measurementState.value = MeasurementState.Idle
+        _measurementProgress.value = 0
+        _measurementPhase.value = ""
+    }
+
+    fun requestDeviceInfo() {
+        repository.requestDeviceInfo()
+    }
+
+    fun requestHistorySync() {
+        repository.requestHistorySync()
+    }
+
+    fun clearDeviceHistory() {
+        repository.clearDeviceHistory()
+    }
+
+    fun syncToCloud(endpoint: String? = null) {
+        viewModelScope.launch {
+            repository.syncToCloud(endpoint)
         }
     }
 }

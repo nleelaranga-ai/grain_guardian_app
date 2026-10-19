@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -19,6 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.vrsec.grainguardian.data.bluetooth.BleConnectionState
 import com.vrsec.grainguardian.domain.localization.LocalizationManager
 import com.vrsec.grainguardian.ui.components.GrainTopBar
@@ -40,6 +43,29 @@ fun ConnectProbeScreen(
     val deviceStatus by viewModel.deviceStatus.collectAsState()
     val liveSensorData by viewModel.liveSensorData.collectAsState()
     val isSandbox by viewModel.isDeveloperSandboxEnabled.collectAsState()
+
+    val permissionsToRequest = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH_SCAN,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            )
+        } else {
+            arrayOf(
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            viewModel.scanForDevices()
+        }
+    }
 
     val pulseTransition = rememberInfiniteTransition(label = "bluetooth_pulse")
     val pulseScale by pulseTransition.animateFloat(
@@ -250,11 +276,19 @@ fun ConnectProbeScreen(
                     PrimaryActionButton(
                         text = if (isScanning) {
                             if (isTelugu) "శోధిస్తోంది..." else "Scanning..."
+                        } else if (bleState is BleConnectionState.PermissionsMissing) {
+                            if (isTelugu) "బ్లూటూత్ అనుమతులు ఇవ్వండి" else "Grant Bluetooth Permissions"
                         } else {
                             if (isTelugu) "ప్రోబ్ కోసం శోధించండి" else "Scan for Probe"
                         },
                         enabled = !isScanning,
-                        onClick = { viewModel.scanForDevices() }
+                        onClick = {
+                            if (viewModel.hasBlePermissions()) {
+                                viewModel.scanForDevices()
+                            } else {
+                                permissionLauncher.launch(permissionsToRequest)
+                            }
+                        }
                     )
                 }
             }

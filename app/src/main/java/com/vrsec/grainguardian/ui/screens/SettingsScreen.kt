@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vrsec.grainguardian.data.cloud.CloudSyncState
 import com.vrsec.grainguardian.domain.localization.AppLanguage
 import com.vrsec.grainguardian.domain.localization.LocalizationManager
 import com.vrsec.grainguardian.ui.components.GrainBottomBar
@@ -39,9 +40,11 @@ fun SettingsScreen(
     val deviceStatus by viewModel.deviceStatus.collectAsState()
     val isConnected by viewModel.isProbeConnected.collectAsState()
     val isSandbox by viewModel.isDeveloperSandboxEnabled.collectAsState()
+    val cloudSyncState by viewModel.cloudSyncState.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
     var showClearDialog by remember { mutableStateOf(false) }
     var showBenchmarkLoadedDialog by remember { mutableStateOf(false) }
+    var serverEndpoint by remember { mutableStateOf("http://10.0.2.2:8000/api/v1/telemetry/sync") }
 
     if (showClearDialog) {
         AlertDialog(
@@ -283,6 +286,75 @@ fun SettingsScreen(
                             checkedTrackColor = GrainAccentYellow
                         )
                     )
+                }
+            }
+
+            // Cloud Synchronization (Offline-First)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GrainSurface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = if (isTelugu) "క్లౌడ్ సింక్రొనైజేషన్" else "Cloud Synchronization",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GrainTextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (isTelugu) "స్థానిక రికార్డులను కేంద్ర వేర్‌హౌస్ క్లౌడ్ సర్వర్‌కు పంపండి." 
+                        else "Upload local Room inspection history to central warehouse server.",
+                        fontSize = 11.sp,
+                        color = GrainTextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = serverEndpoint,
+                        onValueChange = { serverEndpoint = it },
+                        label = { Text(if (isTelugu) "సర్వర్ URL" else "Server API Endpoint", fontSize = 12.sp) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val syncMessage = when (val s = cloudSyncState) {
+                        is CloudSyncState.Idle -> if (isTelugu) "సింక్ చేయడానికి సిద్ధంగా ఉంది" else "Ready to sync"
+                        is CloudSyncState.Syncing -> if (isTelugu) "క్లౌడ్‌కు అప్‌లోడ్ అవుతోంది..." else "Uploading to cloud..."
+                        is CloudSyncState.Success -> if (isTelugu) "పూర్తయింది: ${s.inserted} రికార్డులు అప్‌లోడ్ అయ్యాయి (${s.skipped} దాటవేయబడ్డాయి)" 
+                            else "Success: ${s.inserted} uploaded, ${s.skipped} skipped"
+                        is CloudSyncState.Offline -> if (isTelugu) "ఆఫ్‌లైన్: ${s.reason}" else "Offline: ${s.reason}"
+                    }
+
+                    Text(
+                        text = syncMessage,
+                        fontSize = 12.sp,
+                        color = if (cloudSyncState is CloudSyncState.Success) GrainPrimaryGreen else GrainTextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Button(
+                        onClick = { viewModel.syncToCloud(serverEndpoint) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GrainPrimaryGreen,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = cloudSyncState !is CloudSyncState.Syncing
+                    ) {
+                        Text(
+                            text = if (isTelugu) "ఇప్పుడే క్లౌడ్‌కు సింక్ చేయండి" else "Sync to Cloud Now",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
 

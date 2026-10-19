@@ -1,19 +1,36 @@
-﻿package com.vrsec.grainguardian.data.repository
+package com.vrsec.grainguardian.data.repository
 
 import android.content.Context
 import com.vrsec.grainguardian.data.bluetooth.BleConnectionState
 import com.vrsec.grainguardian.data.bluetooth.BleManager
+import com.vrsec.grainguardian.data.bluetooth.DeviceInfo
+import com.vrsec.grainguardian.data.bluetooth.HistoricalRecord
 import com.vrsec.grainguardian.data.bluetooth.ProbeSensorData
+import com.vrsec.grainguardian.data.bluetooth.SyncStatus
+import com.vrsec.grainguardian.data.cloud.CloudSyncManager
+import com.vrsec.grainguardian.data.cloud.CloudSyncState
 import com.vrsec.grainguardian.data.database.GrainInspectionDao
+import com.vrsec.grainguardian.data.model.CropType
 import com.vrsec.grainguardian.data.model.GrainInspectionEntity
+import com.vrsec.grainguardian.domain.engine.GrainDecisionEngine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class InspectionRepository(
     private val dao: GrainInspectionDao,
     context: Context
 ) {
     val bleManager = BleManager(context)
+    val cloudSyncManager = CloudSyncManager(dao)
+    private val repoScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val allInspections: Flow<List<GrainInspectionEntity>> = dao.getAllInspections()
     val latestInspection: Flow<GrainInspectionEntity?> = dao.getLatestInspection()
@@ -21,6 +38,66 @@ class InspectionRepository(
     val bleConnectionState: StateFlow<BleConnectionState> = bleManager.connectionState
     val liveSensorData: StateFlow<ProbeSensorData> = bleManager.liveSensorData
     val isDeveloperSandboxEnabled: StateFlow<Boolean> = bleManager.isDeveloperSandboxEnabled
+    val deviceInfo: StateFlow<DeviceInfo?> = bleManager.deviceInfo
+    val syncStatus: StateFlow<SyncStatus> = bleManager.syncStatus
+    val historicalRecordsFlow: SharedFlow<HistoricalRecord> = bleManager.historicalRecordsFlow
+    val cloudSyncState: StateFlow<CloudSyncState> = cloudSyncManager.syncState
+
+    init {
+        // Collect and persist incoming historical records from ESP32 LittleFS flash
+        repoScope.launch {
+            bleManager.historicalRecordsFlow.collect { record ->
+                val time = record.timestamp
+                val existingCount = dao.countInspectionsInRange(time - 30000L, time + 30000L)
+                if (existingCount == 0 && record.moisture > 0f) {
+                    val decision = GrainDecisionEngine.evaluateStorage(
+                        crop = CropType.PADDY,
+                        moisture = record.moisture,
+                        t1Top = record.t1,
+                        t2Middle = record.t2,
+                        t3Bottom = record.t3,
+                        humidity = record.humidity
+                    )
+
+                    val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
+                    val formatted = dateFormat.format(Date(time))
+
+                    val entity = GrainInspectionEntity(
+                        cropName = "Paddy",
+                        mode = "Storage Check",
+                        moisture = decision.moisture,
+                        t1Top = decision.t1Top,
+                        t2Middle = decision.t2Middle,
+                        t3Bottom = decision.t3Bottom,
+                        humidity = decision.humidity,
+                        status = decision.status.name,
+                        riskScore = decision.bdrs,
+                        dominantRisk = decision.dominantRisk,
+                        recommendationsJson = decision.recommendedActions.joinToString("|"),
+                        timestamp = time,
+                        formattedDate = formatted
+                    )
+                    dao.insertInspection(entity)
+                }
+            }
+        }
+    }
+
+    fun requestDeviceInfo() {
+        bleManager.requestDeviceInfo()
+    }
+
+    fun requestHistorySync() {
+        bleManager.requestHistorySync()
+    }
+
+    fun clearDeviceHistory() {
+        bleManager.clearDeviceHistory()
+    }
+
+    suspend fun syncToCloud(endpoint: String? = null): CloudSyncState {
+        return cloudSyncManager.syncInspectionsToCloud(customEndpoint = endpoint)
+    }
 
     suspend fun getInspectionById(id: Long): GrainInspectionEntity? {
         return dao.getInspectionById(id)

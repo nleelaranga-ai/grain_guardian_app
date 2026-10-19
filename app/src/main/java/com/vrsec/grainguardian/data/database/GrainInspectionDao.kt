@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.data.database
+package com.vrsec.grainguardian.data.database
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -13,11 +13,17 @@ interface GrainInspectionDao {
     @Query("SELECT * FROM inspections ORDER BY timestamp DESC")
     fun getAllInspections(): Flow<List<GrainInspectionEntity>>
 
+    @Query("SELECT * FROM inspections ORDER BY timestamp DESC")
+    suspend fun getAllInspectionsList(): List<GrainInspectionEntity>
+
     @Query("SELECT * FROM inspections WHERE id = :id LIMIT 1")
     suspend fun getInspectionById(id: Long): GrainInspectionEntity?
 
     @Query("SELECT * FROM inspections ORDER BY timestamp DESC LIMIT 1")
     fun getLatestInspection(): Flow<GrainInspectionEntity?>
+
+    @Query("SELECT COUNT(*) FROM inspections WHERE timestamp BETWEEN :startTime AND :endTime")
+    suspend fun countInspectionsInRange(startTime: Long, endTime: Long): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertInspection(inspection: GrainInspectionEntity): Long

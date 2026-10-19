@@ -1,5 +1,5 @@
-# 🌾 GrainGuardian — Master Technical Documentation & Complete System Status
-**Pin-to-Pin System Architecture, Engineering Specifications & Monday Demonstration Dossier**
+# 🌾 GrainGuardian 2.0 — Master Technical Documentation & Complete System Status
+**Full-Stack Smart Paddy Post-Harvest Readiness & Storage Health Intelligence System**
 
 ---
 
@@ -7,196 +7,259 @@
 
 | Attribute | Details |
 | :--- | :--- |
-| **Product Name** | **GrainGuardian** (పంట రక్షకుడు) |
-| **System Classification** | Smart Paddy Post-Harvest Readiness & Storage Health Intelligence System |
+| **Product Name** | **GrainGuardian 2.0** (పంట రక్షకుడు) |
+| **System Classification** | Full-Stack Offline-First IoT Storage Intelligence & Cloud Analytics Platform |
 | **Target Agronomic Focus** | Paddy (*Oryza sativa*), Maize, Wheat, Pulses |
-| **Target Users** | Smallholder Farmers, Custom Hiring Centers (CHCs), Paddy Millers, PACS, Warehouse In-charges |
-| **Architecture** | MVVM + Unidirectional Data Flow (UDF) + Jetpack Compose + Room SQLite + BLE GATT |
-| **Application ID** | `com.vrsec.grainguardian` |
-| **Current Build Version** | `v1.0.0` (Target SDK 33, Min SDK 26, JVM 11) |
-| **Build & Test Verification** | **BUILD SUCCESSFUL** | Verified on Pixel 6 (API 27) & Physical Hardware Ready |
-| **Academic Terminology Audit** | **100% Cleansed** — Zero occurrences of internal/academic review tags |
+| **Target Users** | Smallholder Farmers, Custom Hiring Centers (CHCs), Paddy Millers, PACS, Central/State Warehouses |
+| **System Architecture** | **3-Tier Distributed Architecture:**<br>1. **Edge Node:** ESP32 Hardware + LittleFS Autonomous Logging + BLE 4.2/5.0<br>2. **Mobile Client:** Android Native (Jetpack Compose + MVVM/UDF + Room SQLite + OkHttp)<br>3. **Enterprise Cloud & Web:** FastAPI + PostgreSQL 16 + Alembic + Next.js 14 App Router |
+| **Application ID** | `com.vrsec.grainguardian` (Android Target SDK 33, Min SDK 26, JVM 11) |
+| **Automated Test Scorecard** | **28 / 28 Automated Verifications Passing (100% Green)**<br>• Android Unit Tests: 18 / 18 Passing<br>• FastAPI Backend Pytest: 9 / 9 Passing (0 warnings)<br>• Next.js 14 Web Build: Compiled & Prerendered Successfully |
+| **Core Safety Invariant** | **Zero False-Safe Defaults** — Sensor errors ($\le 0.0\%$ moisture) never default to $13.2\%$. Disconnected probes ($-127.0^\circ\text{C}$) are flagged as `ERR`. |
 
 ---
 
-## 🎯 1. Mission & Core Problem Solved
+## ⚡ Terminal Navigation & Command Reference Guide
 
-In traditional paddy post-harvest management, smallholder farmers rely on sensory heuristics (biting grains, fingernail indentation, feeling grain temperature with palms). This leads to:
-1. **Premature Bagging & Storage:** Grain packed at $>14\%$ moisture develops hot spots, leading to rapid colonization by *Aspergillus flavus* and carcinogenic Aflatoxin contamination within 48–72 hours.
-2. **Excessive Sun Drying:** Over-drying ($<12\%$ moisture) induces fissure cracks in the endosperm, causing up to **25–30% grain breakage** during commercial milling (*Head Rice Yield* collapse).
-3. **Internal Bag Spoilage:** Deep within a 50 kg or 75 kg jute bag or grain stack, thermal gradients trap moisture migration, destroying grain viability invisibly.
+### ⚠️ Common Navigation Pitfalls & Solutions
 
-**GrainGuardian** resolves this by pairing a physical multi-depth insertion probe with an on-device deterministic intelligence system that requires **zero cloud connectivity**, operating reliably in rural fields and remote warehouses.
+When executing commands in PowerShell or Command Prompt, ensure your terminal is in the correct working directory for each respective tier:
+
+```
+C:\Users\LEELA RANGA PRASAD\.gemini\antigravity\scratch\GrainGuardian\  (ROOT)
+├── app/          <-- Android Client
+├── backend/      <-- FastAPI Backend & Python Services
+├── firmware/     <-- ESP32 Arduino Sketch & Wiring
+└── web/          <-- Next.js 14 Web Dashboard
+```
+
+| Mistake / Error | Cause | Proper Resolution |
+| :--- | :--- | :--- |
+| `cd web : Cannot find path ...\backend\web` | Executed while already inside `backend/` | Run `cd ..\web` to go up one directory, or `cd C:\Users\LEELA RANGA PRASAD\.gemini\antigravity\scratch\GrainGuardian\web` |
+| `npm error enoent Could not read package.json` | Executed `npm run build` inside `backend/` | Switch to the web directory first (`cd ..\web`), then execute `npm.cmd run build` |
+| `docker-compose : The term 'docker-compose' is not recognized` | Legacy hyphenated syntax or Docker Desktop not installed | 1. If using Docker Desktop: run `docker compose up -d --build` (with a space) from the **project root**.<br>2. If Docker is not installed: run the services **natively** using Python and Node (see below). |
 
 ---
 
-## 🏛️ 2. Architectural Overview (Clean MVVM + UDF)
+### Step-by-Step Native Execution (Without Docker)
+
+You do **not** need Docker to run and test GrainGuardian 2.0. All components run natively on Windows:
+
+#### 1. Cloud Backend Service (FastAPI + Uvicorn)
+```powershell
+# Navigate to backend directory
+cd "C:\Users\LEELA RANGA PRASAD\.gemini\antigravity\scratch\GrainGuardian\backend"
+
+# Run automated tests (9 tests, 100% passing)
+.\.venv\Scripts\pytest -v
+
+# Start the live FastAPI server (runs on http://127.0.0.1:8000)
+.\.venv\Scripts\uvicorn app.main:app --reload --port 8000
+```
+- Interactive Swagger API Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- Alternative Redoc Docs: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+- Health Check: [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health)
+
+#### 2. Enterprise Web Dashboard (Next.js 14 + Tailwind CSS)
+```powershell
+# Navigate to web directory (from backend, use cd ..\web; from root, use cd web)
+cd "C:\Users\LEELA RANGA PRASAD\.gemini\antigravity\scratch\GrainGuardian\web"
+
+# Start development server (runs on http://localhost:3000)
+npm.cmd run dev
+
+# Or compile production optimized build
+npm.cmd run build
+```
+
+#### 3. Android Mobile Application
+```powershell
+# Navigate to project root
+cd "C:\Users\LEELA RANGA PRASAD\.gemini\antigravity\scratch\GrainGuardian"
+
+# Run all 18 Android unit tests
+.\gradlew test
+
+# Build debug APK
+.\gradlew assembleDebug
+```
+The compiled APK will be at: `app\build\outputs\apk\debug\app-debug.apk`
+
+---
+
+## 🏛️ System Architecture
 
 ```mermaid
 graph TD
-    subgraph Physical Probe Hardware
-        S1["Capacitive Moisture Sensor SEN0193"] -->|Analog Voltage| ESP["ESP32 Microcontroller"]
-        S2["DS18B20 Temp Top 10cm"] -->|1-Wire Digital| ESP
-        S3["DS18B20 Temp Mid 40cm"] -->|1-Wire Digital| ESP
-        S4["DS18B20 Temp Bottom 80cm"] -->|1-Wire Digital| ESP
-        S5["DHT22 Ambient Humidity"] -->|Digital GPIO| ESP
-        ESP -->|BLE GATT Notify 0xFFE1| BLE_RADIO(("BLE Radio"))
+    subgraph ESP32 Hardware Node
+        S1["Capacitive Moisture Sensor (GPIO 34 ADC1)"] -->|Analog mV| ESP["ESP32 Microcontroller"]
+        S2["DS18B20 Temp Top 10cm (GPIO 4)"] -->|1-Wire Digital| ESP
+        S3["DS18B20 Temp Mid 40cm (GPIO 4)"] -->|1-Wire Digital| ESP
+        S4["DS18B20 Temp Bottom 80cm (GPIO 4)"] -->|1-Wire Digital| ESP
+        S5["DHT11 Ambient Temp & Humidity (GPIO 27)"] -->|Digital GPIO| ESP
+        ESP -->|Autonomous 5-min Log| FS[("LittleFS Binary History /grain_history.bin")]
+        ESP -->|GATT Characteristic 0x1234...AC| BLE_RADIO(("BLE Radio"))
     end
 
-    subgraph Android Client Layer com.vrsec.grainguardian
-        BLE_RADIO -.->|Packet Stream| BLE_MGR["BleManager.kt"]
-        BLE_MGR -->|Telemetry Validation & Stability Buffer| VM["GrainViewModel.kt"]
-        
-        VM -->|Raw Telemetry| ENGINE["GrainDecisionEngine.kt"]
-        ENGINE -->|Deterministic Agronomic Output| VM
-        
-        VM -->|Save Validated Inspection| REPO["InspectionRepository.kt"]
-        REPO -->|DAO Operations| ROOM[("GrainGuardian SQLite DB")]
-        
-        VM -->|StateFlow UI State| COMPOSE["Jetpack Compose UI - 18 Screens"]
-        LOC["LocalizationManager.kt"] -->|Reactive Telugu/English| COMPOSE
+    subgraph Android Client Layer (com.vrsec.grainguardian)
+        BLE_RADIO -.->|Live Packets & HIST Sync| BLE_MGR["BleManager.kt"]
+        BLE_MGR -->|Reconstitute Timestamp from Uptime| VM["GrainViewModel.kt"]
+        VM -->|Evaluate Safety & TGI| ENGINE["GrainDecisionEngine.kt"]
+        VM -->|Save Validated Records| REPO["InspectionRepository.kt"]
+        REPO -->|Temporal Deduplication +-30s| ROOM[("Room SQLite DB (Offline-First)")]
+        REPO -->|Non-Blocking Async Upload| CLOUD_SYNC["CloudSyncManager.kt (OkHttp)"]
+        VM -->|StateFlow UI Stream| COMPOSE["Jetpack Compose UI (18 Screens)"]
+        LOC["LocalizationManager.kt"] -->|Reactive English / Telugu| COMPOSE
+    end
+
+    subgraph Cloud Backend (FastAPI + PostgreSQL)
+        CLOUD_SYNC -->|POST /api/v1/telemetry/sync| API_GATEWAY["FastAPI Application"]
+        API_GATEWAY -->|Bearer JWT Validation| AUTH_SRV["Security & Auth Engine (bcrypt)"]
+        API_GATEWAY -->|Telemetry Persistence| DB[("PostgreSQL 16 / SQLite Head")]
+        API_GATEWAY -->|Hotspot & Stratification Check| RISK_ENGINE["Auto-Risk Detection Engine"]
+        RISK_ENGINE -->|Flag Hotspots & TGI > 4.0C| RISK_ALERTS[("Risk Events Table")]
+    end
+
+    subgraph Enterprise Web Dashboard (Next.js 14)
+        WEB_APP["Next.js 14 App Router"] -->|REST Queries| API_GATEWAY
+        WEB_APP --> G_OVERVIEW["Godown Overview (Capacity, Tonnage, Moisture)"]
+        WEB_APP --> STRAT_CHART["3-Layer Thermal Stratification Visualizer"]
+        WEB_APP --> RISK_TABLE["Active Hotspot & Spoilage Alert Table"]
+        WEB_APP --> FLEET_VIEW["Hardware Probe Fleet & Sync Diagnostics"]
     end
 ```
 
-### Complete Source Tree (Production Ready)
-- `GrainGuardianApp.kt` — Application initialization, database instance creation.
-- `MainActivity.kt` — Activity entry point, Bluetooth permission dispatching.
-- `data/bluetooth/BleManager.kt` — Real Android `BluetoothLeScanner`, ESP32 GATT Client (`0xFFE0 / 0xFFE1`), packet parser, rolling window stability filter.
-- `data/database/GrainGuardianDatabase.kt` — Room database builder, schema definitions.
-- `data/database/GrainInspectionDao.kt` — Asynchronous SQLite queries using Kotlin coroutine Flows.
-- `data/model/` — Domain models: `AssessmentMode.kt`, `CropType.kt`, `DeviceStatus.kt`, `GrainInspectionEntity.kt`, `RiskStatus.kt`.
-- `data/repository/InspectionRepository.kt` — Clean architecture repository isolating DB access on `Dispatchers.IO`.
-- `domain/engine/GrainDecisionEngine.kt` — Deterministic mathematics for $\Delta M$, $\text{TGI}$, $\text{BDRS}$, $\text{GSHI}$, and Critical Limiting Parameter.
-- `domain/localization/LocalizationManager.kt` — Compose-reactive English/Telugu engine with instant recomposition.
-- `ui/components/` — Modular widgets: `CircularGauge.kt`, `CommonCards.kt`, `GrainBottomBar.kt`, `GrainTopBar.kt`, `RiskMeter.kt`, `StatusBadge.kt`.
-- `ui/navigation/` — `GrainNavigation.kt` (NavHost orchestrating all 18 screens) and `Screen.kt` (sealed routes).
-- `ui/screens/` — 18 comprehensive Compose screen implementations.
-- `ui/theme/` — Material 3 theming (`Color.kt`, `Theme.kt`, `Type.kt`).
-- `viewmodel/` — `GrainViewModel.kt` and `GrainViewModelFactory.kt`.
+---
+
+## 🧪 Comprehensive Automated Test Scorecard
+
+### Test Execution Verification (28 Tests Total — 100% Passing)
+
+```
+Test Execution Summary:
+├── Android Test Suite (18 Tests):
+│   ├── com.vrsec.grainguardian.domain.engine.GrainDecisionEngineTest
+│   │   ├── [PASS] testNormalStorageThermalProfileReturnsSafe
+│   │   ├── [PASS] testStorageHotspotGradientTriggersWarningOrHighRisk
+│   │   ├── [PASS] testPaddySafeMoistureReturnsSafeDryingStatus
+│   │   ├── [PASS] testMathematicalBoundsOfBDRSandGSHI
+│   │   ├── [PASS] testDifferentCropsAdhereToDistinctMoistureLimits
+│   │   ├── [PASS] testPaddyHighRiskMoistureReturnsHighRiskDryingStatus
+│   │   └── [PASS] testPaddyWarningMoistureReturnsWarningDryingStatus
+│   ├── com.vrsec.grainguardian.data.bluetooth.SensorCalibrationTest
+│   │   ├── [PASS] testLiveSerialReading2110mVYieldsSafeMoisture
+│   │   ├── [PASS] testBaseline2100mVYieldsExact13Point5Percent
+│   │   ├── [PASS] testDryAirVoltageClampsCorrectly
+│   │   ├── [PASS] testZeroOrNegativeMillivoltsReturnsZero
+│   │   └── [PASS] testWetGrainVoltageCalculatesHighMoisture
+│   ├── com.vrsec.grainguardian.data.bluetooth.BleHistorySyncTest
+│   │   ├── [PASS] testHistPacketParsing
+│   │   ├── [PASS] testTimestampReconstitutionFromUptime
+│   │   ├── [PASS] testDuplicatePacketFilter
+│   │   └── [PASS] testCorruptedPacketHandling
+│   └── com.vrsec.grainguardian.data.cloud.CloudSyncPayloadTest
+│       ├── [PASS] testTelemetrySyncPayloadSerialization
+│       └── [PASS] testNullSafetyAndNegativeValuesInPayload
+│
+├── FastAPI Backend Test Suite (9 Tests):
+│   ├── tests/test_auth.py
+│   │   ├── [PASS] test_register_and_login_success
+│   │   ├── [PASS] test_login_invalid_password_fails
+│   │   └── [PASS] test_duplicate_username_registration_fails
+│   ├── tests/test_devices.py
+│   │   ├── [PASS] test_register_device_and_query
+│   │   └── [PASS] test_device_re_registration_updates_location
+│   ├── tests/test_health.py
+│   │   ├── [PASS] test_health_check
+│   │   └── [PASS] test_root_endpoint
+│   └── tests/test_telemetry.py
+│       ├── [PASS] test_telemetry_sync_and_deduplication
+│       └── [PASS] test_hotspot_telemetry_triggers_risk_event
+│
+└── Next.js 14 Enterprise Web Dashboard (1 Build Verification):
+    └── [PASS] Production type-check & static prerendering (0 errors, 4 routes compiled)
+```
 
 ---
 
-## 📱 3. Pin-to-Pin Screen Portfolio (All 18 Screens)
+## 📱 Android Client Portfolio (All 18 Screens Operational)
 
-| # | Screen Name | Kotlin File | Purpose & Architectural Logic | Telugu Localization Context |
+| # | Screen Name | File | Purpose & Agronomic Logic | Telugu Localization Context |
 | :- | :--- | :--- | :--- | :--- |
-| **1** | **Splash** | [`SplashScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/SplashScreen.kt) | Animated GrainGuardian sheaf logo, 1800ms timer; routes to Language Setup or Dashboard based on preferences. | పంట రక్షకుడు |
-| **2** | **Language Selection** | [`LanguageSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/LanguageSelectionScreen.kt) | High-contrast dual language picker (English vs తెలుగు); updates `LocalizationManager` state instantly. | భాషను ఎంచుకోండి (ఇంగ్లీష్ / తెలుగు) |
-| **3** | **Welcome Onboarding** | [`WelcomeScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/WelcomeScreen.kt) | Farmer onboarding cards highlighting moisture safety, thermal hotspots, and storage life. | రైతు పోర్టల్ ప్రారంభించండి |
-| **4** | **Dashboard** | [`DashboardScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DashboardScreen.kt) | Operations central: live BLE probe chip (`● No Probe`), Grain Storage Health Score (0–100), quick CTAs. | ప్రధాన డాష్‌బోర్డ్, నిల్వ ఆరోగ్య స్కోరు |
-| **5** | **Crop Selection** | [`CropSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/CropSelectionScreen.kt) | Sets target crop with safe storage thresholds: Paddy (13.5%), Maize (14.0%), Wheat (12.5%), Pulses (10.0%). | పంట రకం ఎంపిక (వరి, మొక్కజొన్న, గోధుమ) |
-| **6** | **Assessment Mode** | [`AssessmentSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/AssessmentSelectionScreen.kt) | Dual agronomic pathways: Pre-storage Drying Readiness vs Bagged Storage Pile Health. | ఆరబెట్టే సంసిద్ధత / నిల్వ ధాన్యం ఆరోగ్యం |
-| **7** | **Connect Probe** | [`ConnectProbeScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/ConnectProbeScreen.kt) | Authentic Android BLE scanner; truthful offline & Bluetooth-disabled alerts; lab sandbox simulator. | ప్రోబ్‌ను కనెక్ట్ చేయండి, బ్లూటూత్ స్కానింగ్ |
-| **8** | **Prepare Measurement** | [`PrepareMeasurementScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/PrepareMeasurementScreen.kt) | 3-step physical insertion protocol (vertical push, 15s thermal settling, steady contact); gated on probe. | కొలతకు సిద్ధం చేయండి, 3-దశల సూచనలు |
-| **9** | **Live Measurement** | [`LiveMeasurementScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/LiveMeasurementScreen.kt) | Real-time packet telemetry, 3-depth temperatures (10cm, 40cm, 80cm), 5-reading stability checklist. | ప్రత్యక్ష కొలత, స్థిరత్వ తనిఖీ (ΔM, ΔT) |
-| **10** | **Drying Result** | [`DryingResultScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DryingResultScreen.kt) | Safe to Store vs Further Drying verdict; validated sensor stream badge; exact sun drying hours. | ఆరబెట్టే ఫలితం (నిల్వకు సురక్షితం / ఇంకా ఆరబెట్టాలి) |
-| **11** | **Storage Result** | [`StorageResultScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/StorageResultScreen.kt) | Multi-depth thermal stratification, Thermal Gradient Index ($\text{TGI} = \|T_3 - T_1\|$), risk categorization. | నిల్వ ఫలితం, ఉష్ణోగ్రత ప్రవణత |
-| **12** | **Risk Analysis** | [`RiskAnalysisScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/RiskAnalysisScreen.kt) | Biological Degradation Risk Score (BDRS 0–100), root cause physical breakdown, Critical Limiting Parameter. | ప్రమాద విశ్లేషణ, BDRS స్కోరు, మూల కారణాలు |
-| **13** | **Recommendation** | [`RecommendationScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/RecommendationScreen.kt) | Localized farmer advisory (sun drying, bag turning, aeration); SQLite DB save action. | రైతు కార్యాచరణ సలహా, రికార్డును భద్రపరచండి |
-| **14** | **Inspection History** | [`InspectionHistoryScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/InspectionHistoryScreen.kt) | Searchable and filterable archive of past inspections with date stamps, risk tags, and crop labels. | పరీక్ష రికార్డులు, గత చరిత్ర |
-| **15** | **Inspection Details** | [`InspectionDetailsScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/InspectionDetailsScreen.kt) | Deep historical audit showing all 5 sensor streams, BDRS score, and recommendation given. | వివరణాత్మక రికార్డు వివరాలు |
-| **16** | **Help & Support** | [`HelpScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/HelpScreen.kt) | Agronomic knowledge base (paddy moisture chart, aflatoxin prevention, probe maintenance). | సహాయ కేంద్రం, వ్యవసాయ మార్గదర్శకాలు |
-| **17** | **Settings & Lab Mode** | [`SettingsScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/SettingsScreen.kt) | Language switcher, Developer Sandbox toggle with safety banners, Benchmark loader, Database cleaner. | సెట్టింగ్‌లు, డెవలపర్ సాండ్‌బాక్స్ మోడ్ |
-| **18** | **Device Diagnostics** | [`DeviceInfoScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DeviceInfoScreen.kt) | Hardware telemetry, firmware version, independent 4-sensor health checks (SEN0193, 3x DS18B20). | పరికర సమాచారం, సెన్సార్ డయాగ్నస్టిక్స్ |
+| **1** | **Splash** | [`SplashScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/SplashScreen.kt) | Sheaf logo, animation, initial state check | పంట రక్షకుడు |
+| **2** | **Language Selection** | [`LanguageSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/LanguageSelectionScreen.kt) | English vs తెలుగు switcher with instant recomposition | భాషను ఎంచుకోండి (ఇంగ్లీష్ / తెలుగు) |
+| **3** | **Welcome Onboarding** | [`WelcomeScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/WelcomeScreen.kt) | Aflatoxin prevention, moisture safety cards | రైతు పోర్టల్ ప్రారంభించండి |
+| **4** | **Dashboard** | [`DashboardScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DashboardScreen.kt) | Operations central: BLE probe chip, GSHI score (0–100) | ప్రధాన డాష్‌బోర్డ్, నిల్వ ఆరోగ్య స్కోరు |
+| **5** | **Crop Selection** | [`CropSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/CropSelectionScreen.kt) | Paddy (13.5%), Maize (14.0%), Wheat (12.5%), Pulses (10.0%) | పంట రకం ఎంపిక (వరి, మొక్కజొన్న, గోధుమ) |
+| **6** | **Assessment Mode** | [`AssessmentSelectionScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/AssessmentSelectionScreen.kt) | Dual modes: Pre-storage Drying vs Bagged Storage Monitoring | ఆరబెట్టే సంసిద్ధత / నిల్వ ధాన్యం ఆరోగ్యం |
+| **7** | **Connect Probe** | [`ConnectProbeScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/ConnectProbeScreen.kt) | Real BLE scanner, offline/disabled Bluetooth alerts, lab sandbox | ప్రోబ్‌ను కనెక్ట్ చేయండి, బ్లూటూత్ స్కానింగ్ |
+| **8** | **Prepare Measurement** | [`PrepareMeasurementScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/PrepareMeasurementScreen.kt) | 3-step physical insertion protocol (vertical push, 15s settling) | కొలతకు సిద్ధం చేయండి |
+| **9** | **Live Measurement** | [`LiveMeasurementScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/LiveMeasurementScreen.kt) | Real-time packet telemetry, 3 temperatures, stability checklist | ప్రత్యక్ష కొలత, స్థిరత్వ తనిఖీ (ΔM, ΔT) |
+| **10** | **Drying Result** | [`DryingResultScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DryingResultScreen.kt) | Safe to Store vs Further Drying verdict, solar drying hours | ఆరబెట్టే ఫలితం (నిల్వకు సురక్షితం / ఇంకా ఆరబెట్టాలి) |
+| **11** | **Storage Result** | [`StorageResultScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/StorageResultScreen.kt) | Stratification gradient ($\text{TGI} = \|T_3 - T_1\|$), risk category | నిల్వ ఫలితం, ఉష్ణోగ్రత ప్రవణత |
+| **12** | **Risk Analysis** | [`RiskAnalysisScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/RiskAnalysisScreen.kt) | Biological Degradation Risk Score (BDRS 0–100), root cause breakdown | ప్రమాద విశ్లేషణ, BDRS స్కోరు |
+| **13** | **Recommendation** | [`RecommendationScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/RecommendationScreen.kt) | Localized farmer advisory (sun drying, bag turning, aeration) | రైతు కార్యాచరణ సలహా |
+| **14** | **Inspection History** | [`InspectionHistoryScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/InspectionHistoryScreen.kt) | Searchable and filterable archive of past inspections | పరీక్ష రికార్డులు, గత చరిత్ర |
+| **15** | **Inspection Details** | [`InspectionDetailsScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/InspectionDetailsScreen.kt) | Deep historical audit showing all 5 sensor streams and BDRS score | వివరణాత్మక రికార్డు వివరాలు |
+| **16** | **Help & Support** | [`HelpScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/HelpScreen.kt) | Agronomic knowledge base (paddy moisture chart, maintenance) | సహాయ కేంద్రం, వ్యవసాయ మార్గదర్శకాలు |
+| **17** | **Settings & Cloud Sync** | [`SettingsScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/SettingsScreen.kt) | Language switcher, sandbox toggle, Cloud Sync configuration card | సెట్టింగ్‌లు, క్లౌడ్ సింక్రొనైజేషన్ |
+| **18** | **Device Diagnostics** | [`DeviceInfoScreen.kt`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/app/src/main/java/com/vrsec/grainguardian/ui/screens/DeviceInfoScreen.kt) | Hardware telemetry, LittleFS flash sync triggers (`CMD:SYNC`) | పరికర సమాచారం, సెన్సార్ డయాగ్నస్టిక్స్ |
 
 ---
 
-## 📡 4. BLE Telemetry Protocol & Hardware Integrity
-
-### Hardware Communication Blueprint
-- **Microcontroller:** ESP32 BLE (GATT Server)
-- **GATT Service UUID:** `0000FFE0-0000-1000-8000-00805F9B34FB`
-- **Data Characteristic UUID:** `0000FFE1-0000-1000-8000-00805F9B34FB` (Notify, 1 Hz)
-- **CCCD UUID:** `00002902-0000-1000-8000-00805F9B34FB`
-- **ASCII Stream Format:**
-  ```
-  M:<moisture>,T1:<top>,T2:<middle>,T3:<bottom>,H:<humidity>,B:<battery>
-  ```
-
-### Stabilization Gate Mathematics
-A 5-packet rolling window buffer checks for physical probe equilibrium before unlocking results:
-$$\Delta M = \max_{i=1..5}(M_i) - \min_{i=1..5}(M_i) < 0.25\%$$
-$$\Delta T = \max_{i=1..5}(T_{2,i}) - \min_{i=1..5}(T_{2,i}) < 0.35^\circ\text{C}$$
-
-### Developer Sandbox Mode (Protected Lab Simulation)
-- Located exclusively in **Settings**.
-- Disabled by default — the app never connects to imaginary hardware in production.
-- When explicitly enabled: Displays a high-contrast yellow alert banner (`⚠️ డెవలపర్ సాండ్‌బాక్స్ మోడ్ యాక్టివ్ / Developer Sandbox Mode Active`) so evaluators know laboratory test emulation is underway.
-
----
-
-## 🧮 5. Deterministic Agronomic Decision Engine
-
-All stochastic and random calculations have been eliminated. The system evaluates:
-1. **Moisture Deviation:** $\Delta M = M_{\text{measured}} - 13.5\%$ (Paddy safe limit).
-2. **Thermal Gradient Index:** $\text{TGI} = |T_3 - T_1|$ ($>4.0^\circ\text{C}$ flags severe internal convection).
-3. **Biological Degradation Risk Score (BDRS):** Weighted summation:
-   $$\text{BDRS} = 0.50 \cdot f(M) + 0.30 \cdot f(T_2) + 0.20 \cdot f(\text{TGI})$$
-4. **Grain Storage Health Index:** $\text{GSHI} = 100 - \text{BDRS}$.
-5. **Solar Drying Time:** $t_{\text{drying}} = \max(0, \text{round}(\Delta M \times 2.5))$ hours.
-
----
-
-## 🗄️ 6. SQLite Room Database Architecture
-
-- **Database Class:** `GrainGuardianDatabase.kt` (Version 2)
-- **Table Name:** `grain_inspections`
-- **Columns (17 Fields):**
-  - `id` (INTEGER, Primary Key, Auto-generate)
-  - `timestamp` (INTEGER)
-  - `cropType` (TEXT)
-  - `assessmentMode` (TEXT)
-  - `moisture` (REAL)
-  - `tempTop` (REAL), `tempMiddle` (REAL), `tempBottom` (REAL)
-  - `humidity` (REAL), `batteryLevel` (INTEGER)
-  - `riskStatus` (TEXT: SAFE / MODERATE / HIGH / CRITICAL)
-  - `riskScore` (INTEGER: 0–100)
-  - `dryingHours` (INTEGER), `storageLifeDays` (INTEGER)
-  - `summaryEn` (TEXT), `summaryTe` (TEXT)
-  - `isSandbox` (INTEGER: 0 for physical hardware, 1 for sandbox)
-- **Database Cleansing:** No automatic fake mock seeding on install. Users can click "Load Benchmark Data" in Settings to inspect sample cases on demand, or "Clear All Records" to purge.
-
----
-
-## 🌐 7. Dynamic Telugu Localization Architecture
-
-- Centralized in `LocalizationManager.kt` via Compose `MutableStateFlow<Boolean>`.
-- Observing via `@Composable LocalizationManager.isTelugu()` ensures immediate recomposition of all 18 screens upon toggling.
-- Authentic agricultural phrasing:
-  - *Moisture:* ధాన్యం తేమ శాతం
-  - *Drying:* సూర్యరశ్మి ఆరబెట్టడం
-  - *Safe to Store:* నిల్వకు సురక్షితం
-  - *Thermal Gradient:* ఉష్ణోగ్రత ప్రవణత (తేడా)
-  - *Bag Turning:* బస్తాలు తిరగేయడం
-
----
-
-## 🛠️ 8. Hardware Wiring & ESP32 Firmware Guide
+## 📡 Hardware & Firmware Specifications
 
 ```
 ESP32 Pinout Mapping:
-- GPIO 34 (ADC1): DFRobot SEN0193 Capacitive Moisture Sensor
-- GPIO  4 (DQ)  : 3x DS18B20 1-Wire Digital Probes (with 4.7kΩ pullup to 3.3V)
-- GPIO 15       : DHT22 Ambient Temperature & Humidity Sensor
-- GPIO 35 (ADC1): 18650 Battery Voltage Divider (100kΩ / 100kΩ)
-- 3.3V & GND    : Power rails
+- GPIO 34 (ADC1_CH6): DFRobot SEN0193 Capacitive Moisture Sensor (Analog mV)
+- GPIO  4 (1-Wire)  : 3x DS18B20 Digital Temperature Probes (4.7kΩ pull-up to 3.3V)
+- GPIO 27 (Digital) : DHT11 Ambient Temperature & Humidity Sensor
+- 3.3V & GND        : Sensor power rails
 ```
-Full C++ Arduino firmware sketch is embedded in `PROJECT_MASTER_PIN_TO_PIN.md` and ready for immediate flashing using the Arduino IDE with `ESP32 BLE Arduino` library.
+
+### Hardware Communication Protocol
+- **Microcontroller:** ESP32 BLE (GATT Server)
+- **Service UUID:** `12345678-1234-1234-1234-1234567890AB`
+- **Characteristic UUID:** `12345678-1234-1234-1234-1234567890AC` (Read, Write, Notify)
+- **Live Stream Packet:**
+  ```
+  M:<moisture>,T1:<top>,T2:<middle>,T3:<bottom>,H:<humidity>,B:<battery>
+  ```
+- **Flash History Synchronization Packets:**
+  ```
+  HIST:SEQ=<seq>,UP=<uptime>,M=<moisture>,T1=<top>,T2=<mid>,T3=<bot>,H=<hum>
+  HIST_END:COUNT=<total>
+  ```
+- **Phone Command Control:**
+  - `CMD:INFO`: Request firmware version, uptime, and stored record count.
+  - `CMD:SYNC`: Trigger playback of LittleFS binary history packets.
+  - `CMD:CLEAR_HISTORY`: Clear flash logs after verified sync.
 
 ---
 
-## 🎤 9. Monday Presentation Script & Defense Strategy
+## 🧮 Agronomic Decision Mathematics
 
-### 3-Minute Presentation Walkthrough:
-1. **The Problem (0:00 - 0:45):** Highlight ₹10,000+ loss per farmer caused by guessing moisture with teeth, leading to Aflatoxin fungus or rice shattering in mills.
-2. **The App & Hardware Integrity (0:45 - 1:30):** Show GrainGuardian on the phone. Point out `● No Probe Connected` on the dashboard. Explain that the app enforces truthfulness — it does not invent fake numbers.
-3. **Live Measurement & Stability (1:30 - 2:15):** Switch to Telugu. Open Live Measurement in Sandbox Mode (pointing out the yellow developer hazard banner). Show live packet reception, the 5-reading stability gate ($\Delta M < 0.25\%$), and the resulting BDRS score with exact sun-drying hours.
-4. **Conclusion (2:15 - 3:00):** Show the persistent SQLite history, explain that the app works completely offline without internet, and close with the ₹1,800 probe fabrication cost.
+1. **Moisture Deviation:**
+   $$\Delta M = M_{\text{measured}} - M_{\text{safe}}$$
+   *(For paddy: $M_{\text{safe}} = 13.5\%$)*
+2. **Thermal Gradient Index (TGI):**
+   $$\text{TGI} = |T_3 - T_1|$$
+   *($\text{TGI} > 4.0^\circ\text{C}$ indicates convective moisture migration and microclimatic condensation)*
+3. **Biological Degradation Risk Score (BDRS 0–100):**
+   $$\text{BDRS} = 0.50 \cdot f(M) + 0.30 \cdot f(T_2) + 0.20 \cdot f(\text{TGI})$$
+4. **Grain Storage Health Index (GSHI 0–100):**
+   $$\text{GSHI} = 100 - \text{BDRS}$$
+5. **Solar Drying Duration Estimate:**
+   $$t_{\text{drying}} = \max(0, \text{round}(\Delta M \times 2.5))\text{ hours}$$
 
-### Evaluator FAQ Defense:
-- **Q: "Why does it say No Probe Connected?"**  
-  *A: "Because GrainGuardian is a genuine hardware client. It refuses to deceive the farmer by showing imaginary numbers when the physical BLE probe is switched off. For demonstration without the probe, we provided an isolated Developer Sandbox Mode with an explicit safety warning."*
-- **Q: "How do you know the moisture reading is accurate?"**  
-  *A: "The app implements a mathematical stability gate requiring 5 consecutive readings where $\Delta M < 0.25\%$ and $\Delta T < 0.35^\circ\text{C}$ before computing results. This eliminates noise from grain friction."*
-- **Q: "Can an uneducated farmer use this?"**  
-  *A: "Yes. The UI is 100% in natural Telugu, uses large visual gauges, and gives simple direct instructions: 'ఆరబెట్టండి 4 గంటలు' (Dry for 4 hours) or 'బస్తాలు తిరగేయండి' (Turn bags)."*
+---
+
+## 🚢 Deployment Architecture (Docker & CI/CD)
+
+- **Root Environment File:** [`.env.example`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/.env.example)
+- **Docker Compose:** [`docker-compose.yml`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/docker-compose.yml) provisions:
+  - `backend`: FastAPI Python 3.12 service on port 8000
+  - `db`: PostgreSQL 16 Alpine with persistent volume on port 5432
+- **GitHub Actions CI:** [`.github/workflows/ci.yml`](file:///C:/Users/LEELA%20RANGA%20PRASAD/.gemini/antigravity/scratch/GrainGuardian/.github/workflows/ci.yml) executes on every push/PR:
+  1. Android unit test suite (`./gradlew test`)
+  2. Cloud backend Pytest suite (`pytest -v`)
+  3. Next.js 14 Web production build (`npm run build`)

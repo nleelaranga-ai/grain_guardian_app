@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +26,7 @@ import com.vrsec.grainguardian.R
 import com.vrsec.grainguardian.domain.localization.LocalizationManager
 import com.vrsec.grainguardian.ui.components.GrainTopBar
 import com.vrsec.grainguardian.ui.components.PrimaryActionButton
+import com.vrsec.grainguardian.data.bluetooth.SyncStatus
 import com.vrsec.grainguardian.ui.theme.*
 import com.vrsec.grainguardian.viewmodel.GrainViewModel
 
@@ -38,6 +39,8 @@ fun DeviceInfoScreen(
     val isTelugu = LocalizationManager.isTelugu()
     val deviceStatus by viewModel.deviceStatus.collectAsState()
     val isConnected by viewModel.isProbeConnected.collectAsState()
+    val deviceInfo by viewModel.deviceInfo.collectAsState()
+    val syncStatus by viewModel.syncStatus.collectAsState()
 
     Scaffold(
         topBar = {
@@ -177,6 +180,94 @@ fun DeviceInfoScreen(
                         SensorStatusRow(label = if (isTelugu) "మధ్య పొర ఉష్ణోగ్రత సెన్సార్ (T2)" else "Middle Temp Sensor (T2 - DS18B20)", isOk = deviceStatus.tempSensor2Ok)
                         Spacer(modifier = Modifier.height(8.dp))
                         SensorStatusRow(label = if (isTelugu) "దిగువ పొర ఉష్ణోగ్రత సెన్సార్ (T3)" else "Bottom Temp Sensor (T3 - DS18B20)", isOk = deviceStatus.tempSensor3Ok)
+                    }
+                }
+
+                if (isConnected) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Offline Sync Card (LittleFS Flash Storage)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = GrainSurface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (isTelugu) "ఆఫ్‌లైన్ రికార్డులు (LittleFS)" else "Offline Records (LittleFS Flash)",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GrainTextPrimary
+                                )
+                                Text(
+                                    text = "${deviceInfo?.recordCount ?: 0} " + (if (isTelugu) "రికార్డులు" else "records"),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GrainPrimaryGreen
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            val syncText = when (val s = syncStatus) {
+                                is SyncStatus.Idle -> if (isTelugu) "సింక్ చేయడానికి సిద్ధంగా ఉంది" else "Ready to sync"
+                                is SyncStatus.Syncing -> if (isTelugu) "సింక్ అవుతోంది (${s.current}/${s.total})..." else "Syncing (${s.current}/${s.total})..."
+                                is SyncStatus.Completed -> if (isTelugu) "పూర్తయింది: ${s.totalSynced} రికార్డులు సేవ్ అయ్యాయి" else "Synced: ${s.totalSynced} records saved"
+                                is SyncStatus.Empty -> if (isTelugu) "సింక్ చేయడానికి కొత్త రికార్డులు లేవు" else "No new records on probe"
+                                is SyncStatus.Cleared -> if (isTelugu) "ప్రోబ్ ఫ్లాష్ మెమొరీ క్లియర్ చేయబడింది" else "Probe flash memory cleared"
+                                is SyncStatus.Error -> s.message
+                            }
+
+                            Text(
+                                text = syncText,
+                                fontSize = 12.sp,
+                                color = GrainTextSecondary
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { viewModel.requestHistorySync() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = GrainPrimaryGreen,
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.weight(1f),
+                                    enabled = syncStatus !is SyncStatus.Syncing
+                                ) {
+                                    Text(
+                                        text = if (isTelugu) "సింక్ చేయండి" else "Sync Records",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                OutlinedButton(
+                                    onClick = { viewModel.clearDeviceHistory() },
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.weight(1f),
+                                    enabled = syncStatus !is SyncStatus.Syncing
+                                ) {
+                                    Text(
+                                        text = if (isTelugu) "క్లియర్ చేయండి" else "Clear Flash",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GrainDangerRed
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

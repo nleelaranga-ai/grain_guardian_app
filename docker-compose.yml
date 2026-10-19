@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: grainguardian-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-grainguardian}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-grainguardian_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-grainguardian}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-grainguardian}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: grainguardian-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-grainguardian}:${POSTGRES_PASSWORD:-grainguardian_secret}@db:5432/${POSTGRES_DB:-grainguardian}
+      SECRET_KEY: ${SECRET_KEY:-grainguardian-production-secret-key-change-in-prod}
+      API_V1_STR: /api/v1
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

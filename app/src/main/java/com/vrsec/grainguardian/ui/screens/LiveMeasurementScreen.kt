@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -115,6 +115,58 @@ fun LiveMeasurementScreen(
                 PrimaryActionButton(
                     text = if (isTelugu) "ప్రోబ్‌ను కనెక్ట్ చేయండి" else "Connect Probe",
                     onClick = onConnectProbeClick,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            } else if (measurementState is MeasurementState.Error) {
+                val err = measurementState as MeasurementState.Error
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(90.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFEE2E2)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = GrainDangerRed,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = if (isTelugu) "సెన్సార్ లోపం గుర్తించబడింది" else "Sensor Fault Detected",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GrainTextPrimary
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = if (isTelugu) err.messageTe else err.messageEn,
+                        fontSize = 14.sp,
+                        color = GrainTextSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
+
+                PrimaryActionButton(
+                    text = if (isTelugu) "మళ్లీ ప్రయత్నించండి" else "Retry Measurement",
+                    onClick = {
+                        viewModel.resetMeasurementState()
+                        viewModel.startLiveMeasurement { mode ->
+                            onMeasurementComplete(mode)
+                        }
+                    },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             } else {
