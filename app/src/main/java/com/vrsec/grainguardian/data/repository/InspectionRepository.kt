@@ -99,6 +99,29 @@ class InspectionRepository(
         return cloudSyncManager.syncInspectionsToCloud(customEndpoint = endpoint)
     }
 
+    val warningInspections: Flow<List<GrainInspectionEntity>> = dao.getWarningsInspections()
+    val deviceProblemInspections: Flow<List<GrainInspectionEntity>> = dao.getDeviceProblemsInspections()
+    val pendingSyncCount: Flow<Int> = dao.countPendingSync()
+    val confirmedSyncCount: Flow<Int> = dao.countConfirmedSync()
+
+    suspend fun save(inspection: GrainInspectionEntity): Long {
+        return dao.insertInspection(inspection)
+    }
+
+    fun listAll(): Flow<List<GrainInspectionEntity>> = dao.getAllInspections()
+
+    fun listWarnings(): Flow<List<GrainInspectionEntity>> = dao.getWarningsInspections()
+
+    fun listDeviceProblems(): Flow<List<GrainInspectionEntity>> = dao.getDeviceProblemsInspections()
+
+    suspend fun getDetails(id: Long): GrainInspectionEntity? {
+        return dao.getInspectionById(id)
+    }
+
+    suspend fun pendingForSync(): List<GrainInspectionEntity> {
+        return dao.getPendingForSync()
+    }
+
     suspend fun getInspectionById(id: Long): GrainInspectionEntity? {
         return dao.getInspectionById(id)
     }

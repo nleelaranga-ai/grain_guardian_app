@@ -45,6 +45,18 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
     val allInspections: StateFlow<List<GrainInspectionEntity>> = repository.allInspections
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val warningInspections: StateFlow<List<GrainInspectionEntity>> = repository.warningInspections
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val deviceProblemInspections: StateFlow<List<GrainInspectionEntity>> = repository.deviceProblemInspections
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val pendingSyncCount: StateFlow<Int> = repository.pendingSyncCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val confirmedSyncCount: StateFlow<Int> = repository.confirmedSyncCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val latestInspection: StateFlow<GrainInspectionEntity?> = repository.latestInspection
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 

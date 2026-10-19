@@ -1,12 +1,25 @@
 package com.vrsec.grainguardian.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.UUID
 
-@Entity(tableName = "inspections")
+@Entity(
+    tableName = "inspections",
+    indices = [Index(value = ["uuid"], unique = true)]
+)
 data class GrainInspectionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val uuid: String = UUID.randomUUID().toString(),
+    val deviceId: String? = null,
+    val sessionId: String? = null,
+    val syncState: String = "LOCAL", // "LOCAL", "PENDING", "CONFIRMED"
+    val source: String = "REAL",     // "REAL", "SIMULATED"
+    val ruleVersion: String? = "0.1.0-unvalidated",
+    val statusCode: String? = "NORMAL",
+    val reasonCode: String? = null,
     val cropName: String = "Paddy",
     val mode: String = "Storage Check", // "Drying Check" or "Storage Check"
     val moisture: Float = 0.0f,

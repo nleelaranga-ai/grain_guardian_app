@@ -25,6 +25,24 @@ interface GrainInspectionDao {
     @Query("SELECT COUNT(*) FROM inspections WHERE timestamp BETWEEN :startTime AND :endTime")
     suspend fun countInspectionsInRange(startTime: Long, endTime: Long): Int
 
+    @Query("SELECT * FROM inspections WHERE status IN ('WARNING', 'HIGH_RISK') OR statusCode = 'ATTENTION' ORDER BY timestamp DESC")
+    fun getWarningsInspections(): Flow<List<GrainInspectionEntity>>
+
+    @Query("SELECT * FROM inspections WHERE statusCode = 'SENSOR_FAULT' OR dominantRisk LIKE '%Fault%' OR dominantRisk LIKE '%Error%' ORDER BY timestamp DESC")
+    fun getDeviceProblemsInspections(): Flow<List<GrainInspectionEntity>>
+
+    @Query("SELECT * FROM inspections WHERE syncState IN ('LOCAL', 'PENDING') AND source != 'SIMULATED' ORDER BY timestamp ASC")
+    suspend fun getPendingForSync(): List<GrainInspectionEntity>
+
+    @Query("UPDATE inspections SET syncState = :syncState WHERE id = :id")
+    suspend fun updateSyncState(id: Long, syncState: String)
+
+    @Query("SELECT COUNT(*) FROM inspections WHERE syncState IN ('LOCAL', 'PENDING') AND source != 'SIMULATED'")
+    fun countPendingSync(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM inspections WHERE syncState = 'CONFIRMED' AND source != 'SIMULATED'")
+    fun countConfirmedSync(): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertInspection(inspection: GrainInspectionEntity): Long
 

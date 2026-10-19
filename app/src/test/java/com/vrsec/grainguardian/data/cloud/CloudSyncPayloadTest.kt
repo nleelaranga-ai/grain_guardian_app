@@ -16,6 +16,12 @@ class CloudSyncPayloadTest {
         override suspend fun getInspectionById(id: Long): GrainInspectionEntity? = null
         override fun getLatestInspection(): Flow<GrainInspectionEntity?> = throw NotImplementedError()
         override suspend fun countInspectionsInRange(startTime: Long, endTime: Long): Int = 0
+        override fun getWarningsInspections(): Flow<List<GrainInspectionEntity>> = throw NotImplementedError()
+        override fun getDeviceProblemsInspections(): Flow<List<GrainInspectionEntity>> = throw NotImplementedError()
+        override suspend fun getPendingForSync(): List<GrainInspectionEntity> = emptyList()
+        override suspend fun updateSyncState(id: Long, syncState: String) {}
+        override fun countPendingSync(): Flow<Int> = throw NotImplementedError()
+        override fun countConfirmedSync(): Flow<Int> = throw NotImplementedError()
         override suspend fun insertInspection(inspection: GrainInspectionEntity): Long = 1L
         override suspend fun deleteInspection(inspection: GrainInspectionEntity) {}
         override suspend fun clearAll() {}
