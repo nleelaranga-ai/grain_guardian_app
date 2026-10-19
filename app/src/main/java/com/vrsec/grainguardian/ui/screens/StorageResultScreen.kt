@@ -88,18 +88,34 @@ fun StorageResultScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                androidx.compose.material3.Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = GrainLightGreen,
-                    modifier = Modifier.padding(bottom = 14.dp)
-                ) {
-                    Text(
-                        text = if (isTelugu) "✓ ధృవీకరించబడిన హార్డ్‌వేర్ సెన్సార్ డేటా" else "✓ Validated Hardware Sensor Stream",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = GrainDarkGreen,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+                if (decision?.isSimulated == true || decision?.source == "SIMULATED") {
+                    androidx.compose.material3.Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFFFFF3CD),
+                        modifier = Modifier.padding(bottom = 14.dp)
+                    ) {
+                        Text(
+                            text = if (isTelugu) "⚠️ డెమో డేటా (సిమ్యులేషన్)" else "⚠️ Demo data (Simulation)",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF856404),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                } else {
+                    androidx.compose.material3.Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = GrainLightGreen,
+                        modifier = Modifier.padding(bottom = 14.dp)
+                    ) {
+                        Text(
+                            text = if (isTelugu) "✓ ధృవీకరించబడిన హార్డ్‌వేర్ సెన్సార్ డేటా" else "✓ Validated Hardware Sensor Stream",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = GrainDarkGreen,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
                 }
 
                 Text(

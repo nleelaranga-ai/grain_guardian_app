@@ -12,8 +12,11 @@ import com.vrsec.grainguardian.data.model.CropType
 import com.vrsec.grainguardian.data.model.DeviceStatus
 import com.vrsec.grainguardian.data.model.GrainInspectionEntity
 import com.vrsec.grainguardian.data.repository.InspectionRepository
+import com.vrsec.grainguardian.domain.engine.AssessmentStatus
 import com.vrsec.grainguardian.domain.engine.DecisionResult
 import com.vrsec.grainguardian.domain.engine.GrainDecisionEngine
+import com.vrsec.grainguardian.domain.engine.GrainReading
+import com.vrsec.grainguardian.domain.engine.RuleConfig
 import com.vrsec.grainguardian.domain.localization.AppLanguage
 import com.vrsec.grainguardian.domain.localization.LocalizationManager
 import kotlinx.coroutines.delay
@@ -223,49 +226,41 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
 
             val finalSensor = repository.liveSensorData.value
             val isDrying = _selectedMode.value == AssessmentMode.DRYING_READINESS
+            val isSandbox = repository.isDeveloperSandboxEnabled.value
+            val now = System.currentTimeMillis()
 
-            // CRITICAL SAFETY CHECK: Never issue a safe verdict from missing or invalid moisture data
-            if (finalSensor.moisture <= 0f) {
-                _measurementState.value = MeasurementState.Error(
-                    messageEn = "Moisture sensor disconnected or invalid reading. Cannot issue safety verdict.",
-                    messageTe = "తేమ సెన్సార్ కనెక్ట్ కాలేదు లేదా చెల్లని రీడింగ్ వచ్చింది. భద్రతా ఫలితాన్ని లెక్కించలేము."
+            val readingList = List(5) { i ->
+                GrainReading(
+                    timestamp = now - (4 - i) * 1000L,
+                    moisture = if (finalSensor.moisture > 0f) finalSensor.moisture else null,
+                    moistureMv = if (finalSensor.moistureSensorOk) 2100 else null,
+                    t1Top = if (finalSensor.t1Top > 0f) finalSensor.t1Top else null,
+                    t2Middle = if (finalSensor.t2Middle > 0f) finalSensor.t2Middle else null,
+                    t3Bottom = if (finalSensor.t3Bottom > 0f) finalSensor.t3Bottom else null,
+                    ambientHumidity = if (finalSensor.ambientHumidity > 0f) finalSensor.ambientHumidity else 65f,
+                    isSimulated = isSandbox
                 )
-                _measurementPhase.value = if (LocalizationManager.isTeluguRaw()) 
-                    "లోపం: తేమ సెన్సార్ రీడింగ్ రాలేదు" 
-                    else "Error: Moisture sensor reading missing"
-                return@launch
             }
-
-            // CRITICAL SAFETY CHECK: Storage check requires valid multi-depth temperature readings
-            if (!isDrying && (finalSensor.t1Top <= 0f || finalSensor.t2Middle <= 0f || finalSensor.t3Bottom <= 0f)) {
-                _measurementState.value = MeasurementState.Error(
-                    messageEn = "Multi-depth temperature probes disconnected. Cannot evaluate storage hotspot risk.",
-                    messageTe = "ఉష్ణోగ్రత సెన్సార్లు కనెక్ట్ కాలేదు. నిల్వ హాట్‌స్పాట్ ప్రమాదాన్ని అంచనా వేయలేము."
-                )
-                _measurementPhase.value = if (LocalizationManager.isTeluguRaw()) 
-                    "లోపం: ఉష్ణోగ్రత సెన్సార్ రీడింగ్ రాలేదు" 
-                    else "Error: Temperature probe readings missing"
-                return@launch
-            }
-
-            val measuredMoisture = finalSensor.moisture
-            val measuredT1 = finalSensor.t1Top
-            val measuredT2 = finalSensor.t2Middle
-            val measuredT3 = finalSensor.t3Bottom
-            val measuredHumidity = if (finalSensor.ambientHumidity > 0f) finalSensor.ambientHumidity else 65.0f
 
             _measurementState.value = MeasurementState.ComputingDecision
             val decision = if (isDrying) {
-                GrainDecisionEngine.evaluateDrying(_selectedCrop.value, measuredMoisture)
+                GrainDecisionEngine.evaluatePreStorage(readingList)
             } else {
-                GrainDecisionEngine.evaluateStorage(
-                    crop = _selectedCrop.value,
-                    moisture = measuredMoisture,
-                    t1Top = measuredT1,
-                    t2Middle = measuredT2,
-                    t3Bottom = measuredT3,
-                    humidity = measuredHumidity
+                GrainDecisionEngine.evaluateStoredGrain(readingList)
+            }
+
+            if (decision.assessmentStatus == AssessmentStatus.SENSOR_FAULT ||
+                decision.assessmentStatus == AssessmentStatus.STALE ||
+                decision.assessmentStatus == AssessmentStatus.INSUFFICIENT_EVIDENCE
+            ) {
+                _measurementState.value = MeasurementState.Error(
+                    messageEn = decision.subtitle,
+                    messageTe = decision.subtitleTelugu
                 )
+                _measurementPhase.value = if (LocalizationManager.isTeluguRaw()) 
+                    "లోపం: ${decision.headlineTelugu}" 
+                    else "Error: ${decision.headline}"
+                return@launch
             }
 
             _currentDecision.value = decision

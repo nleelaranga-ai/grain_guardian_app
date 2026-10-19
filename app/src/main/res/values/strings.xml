@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GrainGuardian</string>
     <string name="app_tagline">Post-Harvest Readiness &amp; Storage Health Intelligence</string>
@@ -9,4 +9,15 @@
     <string name="select_crop">Select Crop</string>
     <string name="drying_check">Drying Check</string>
     <string name="storage_check">Storage Check</string>
+
+    <!-- FES v1.0 Qualitative Guidance Strings -->
+    <string name="drying_needed_guidance">Your paddy may need more drying before storage.</string>
+    <string name="drying_safe_guidance">Paddy moisture is within the safe storage threshold.</string>
+    <string name="crop_not_available_yet">Not available yet</string>
+    <string name="demo_data_label">Demo data</string>
+    <string name="status_normal">Normal</string>
+    <string name="status_attention">Attention Needed</string>
+    <string name="status_sensor_fault">Sensor Fault</string>
+    <string name="status_stale">Stale Reading</string>
+    <string name="status_insufficient">Insufficient Data</string>
 </resources>

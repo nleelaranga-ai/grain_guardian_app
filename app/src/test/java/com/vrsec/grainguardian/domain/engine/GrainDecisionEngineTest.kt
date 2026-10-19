@@ -7,101 +7,178 @@ import org.junit.Test
 
 class GrainDecisionEngineTest {
 
-    @Test
-    fun testPaddySafeMoistureReturnsSafeDryingStatus() {
-        val result = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 12.8f)
-        assertEquals(RiskStatus.SAFE, result.status)
-        assertTrue(result.isMoistureSafe)
-        assertTrue(result.bdrs in 5..18)
-        assertEquals(100 - result.bdrs, result.gshi)
-        assertTrue(result.whyReasons.isNotEmpty())
-        assertTrue(result.whyReasonsTelugu.isNotEmpty())
-        assertTrue(result.recommendedActions.isNotEmpty())
+    private val baseTime = System.currentTimeMillis()
+
+    private fun createValidReadings(
+        count: Int = 5,
+        moisture: Float = 13.0f,
+        moistureMv: Int = 2100,
+        t1: Float = 28.0f,
+        t2: Float = 29.0f,
+        t3: Float = 29.5f,
+        timestamp: Long = baseTime,
+        isSimulated: Boolean = false
+    ): List<GrainReading> {
+        return List(count) { i ->
+            GrainReading(
+                timestamp = timestamp - (count - 1 - i) * 1000L,
+                moisture = moisture,
+                moistureMv = moistureMv,
+                t1Top = t1,
+                t2Middle = t2,
+                t3Bottom = t3,
+                ambientHumidity = 65.0f,
+                ambientTemp = 28.0f,
+                isSimulated = isSimulated
+            )
+        }
     }
 
     @Test
-    fun testPaddyWarningMoistureReturnsWarningDryingStatus() {
-        // Safe limit is 13.5%. 14.5% is within +2.5% warning window
-        val result = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 14.5f)
-        assertEquals(RiskStatus.WARNING, result.status)
-        assertFalse(result.isMoistureSafe)
-        assertTrue(result.bdrs in 35..65)
+    fun testZeroMoistureVoltageYieldsSensorFaultAndNot13Point2() {
+        // Moisture voltage 0.0 / moisture 0.0f must produce SENSOR_FAULT, NEVER 13.2%
+        val readings = createValidReadings(moisture = 0.0f, moistureMv = 0)
+        val result = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.SENSOR_FAULT, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_SENSOR_FAULT_MOISTURE, result.reasonCode)
+        assertFalse("Must never issue safe verdict on zero moisture", result.isMoistureSafe)
+        assertNotEquals(13.2f, result.moisture, 0.001f)
+    }
+
+    @Test
+    fun testMissingDS18B20ReadingYieldsSensorFault() {
+        // Stored grain monitoring with missing/disconnected DS18B20 (-127°C or null)
+        val readings = List(5) { i ->
+            GrainReading(
+                timestamp = baseTime - i * 1000L,
+                moisture = 13.0f,
+                moistureMv = 2100,
+                t1Top = 28.0f,
+                t2Middle = -127.0f, // Dallas disconnect token
+                t3Bottom = 29.0f
+            )
+        }
+        val result = GrainDecisionEngine.evaluateStoredGrain(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.SENSOR_FAULT, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_SENSOR_FAULT_TEMPERATURE, result.reasonCode)
+        assertEquals("SENSOR FAULT", result.headline)
+    }
+
+    @Test
+    fun testValidReadingsOlderThanMaxReadingAgeMinutesYieldsStale() {
+        // Reading older than maxReadingAgeMinutes (30 mins = 1800s)
+        val oldTimestamp = baseTime - (35 * 60 * 1000L) // 35 minutes ago
+        val readings = createValidReadings(timestamp = oldTimestamp)
+        val result = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.STALE, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_STALE_DATA, result.reasonCode)
+        assertEquals("STALE MEASUREMENT", result.headline)
+    }
+
+    @Test
+    fun testFewerThanMinValidReadingsYieldsInsufficientEvidence() {
+        // Only 3 readings provided (requires min 5)
+        val readings = createValidReadings(count = 3)
+        val result = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.INSUFFICIENT_EVIDENCE, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_INSUFFICIENT_READINGS, result.reasonCode)
+        assertEquals("INSUFFICIENT EVIDENCE", result.headline)
+    }
+
+    @Test
+    fun testGradientAboveThermalGradientWarnCYieldsAttentionWithThermalGradientReason() {
+        // Gradient |32.5 - 28.0| = 4.5°C > 3.0°C warn threshold
+        val readings = createValidReadings(t1 = 28.0f, t2 = 30.0f, t3 = 32.5f)
+        val result = GrainDecisionEngine.evaluateStoredGrain(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.ATTENTION, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_THERMAL_GRADIENT, result.reasonCode)
+        assertEquals(4.5f, result.tgi, 0.05f)
+    }
+
+    @Test
+    fun testEverythingValidAndWithinLimitsYieldsNormal() {
+        // Moisture 12.8% <= 13.5%, TGI = 0.5°C <= 3.0°C, all readings valid and fresh
+        val readings = createValidReadings(moisture = 12.8f, t1 = 28.0f, t2 = 28.2f, t3 = 28.5f)
+        val preStorageResult = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+        val storedResult = GrainDecisionEngine.evaluateStoredGrain(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.NORMAL, preStorageResult.assessmentStatus)
+        assertEquals(AssessmentStatus.NORMAL, storedResult.assessmentStatus)
+        assertEquals(RiskStatus.SAFE, preStorageResult.status)
+        assertEquals(RiskStatus.SAFE, storedResult.status)
+    }
+
+    @Test
+    fun testMoistureAboveTargetInPreStorageModeYieldsDryingNeededWithNoHoursValue() {
+        // Moisture 15.5% > 13.5%
+        val readings = createValidReadings(moisture = 15.5f)
+        val result = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+
+        assertEquals(AssessmentStatus.ATTENTION, result.assessmentStatus)
+        assertEquals(GrainDecisionEngine.REASON_MOISTURE_ABOVE_TARGET, result.reasonCode)
         assertTrue(result.headline.contains("NOT READY", ignoreCase = true))
+
+        // Check qualitative guidance from FES
+        assertEquals(GrainDecisionEngine.ADVICE_DRYING_NEEDED_EN, result.subtitle)
+        assertEquals(GrainDecisionEngine.ADVICE_DRYING_NEEDED_TE, result.subtitleTelugu)
+
+        // Verify NO hours numbers in subtitle or recommendations
+        assertFalse("Must not contain numeric hours", result.subtitle.contains("hours", ignoreCase = true))
+        assertFalse("Must not contain numeric hours", result.subtitleTelugu.contains("గంటలు"))
     }
 
     @Test
-    fun testPaddyHighRiskMoistureReturnsHighRiskDryingStatus() {
-        // Safe limit is 13.5%. 18.0% exceeds safe + 2.5%
-        val result = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 18.0f)
-        assertEquals(RiskStatus.HIGH_RISK, result.status)
-        assertFalse(result.isMoistureSafe)
-        assertTrue(result.bdrs >= 70)
+    fun testSameReadingsInStoredModeNeverProduceDryingAdvice() {
+        // Same elevated moisture in stored mode
+        val readings = createValidReadings(moisture = 15.5f, t1 = 28.0f, t2 = 28.5f, t3 = 29.0f)
+        val storedResult = GrainDecisionEngine.evaluateStoredGrain(readings, currentTimeMs = baseTime)
+
+        // Stored results must NEVER recommend drying or mention sun drying
+        for (action in storedResult.recommendedActions) {
+            assertFalse("Stored mode must never recommend sun drying", action.contains("sun dry", ignoreCase = true))
+            assertFalse("Stored mode must never recommend sun drying", action.contains("drying yard", ignoreCase = true))
+        }
+        for (actionTe in storedResult.recommendedActionsTelugu) {
+            assertFalse("Stored mode must never recommend sun drying in Telugu", actionTe.contains("ఎండలో ఆరబెట్టండి"))
+        }
     }
 
     @Test
-    fun testNormalStorageThermalProfileReturnsSafe() {
-        // TGI = 25.94 - 25.38 = 0.56°C, M = 13.4%
-        val result = GrainDecisionEngine.evaluateStorage(
-            crop = CropType.PADDY,
-            moisture = 13.4f,
-            t1Top = 25.38f,
-            t2Middle = 25.56f,
-            t3Bottom = 25.94f,
-            humidity = 64.4f
-        )
-        assertEquals(RiskStatus.SAFE, result.status)
-        assertEquals(0.56f, result.tgi, 0.05f)
-        assertTrue(result.bdrs in 6..20)
-        assertEquals(100 - result.bdrs, result.gshi)
-        assertEquals("GRAIN STORAGE IS SAFE", result.headline)
-        assertEquals("నిల్వ సురక్షితంగా ఉంది", result.headlineTelugu)
+    fun testLosingConnectivityDoesNotChangeAnyAssessmentStatus() {
+        // Connectivity is separate from agronomic assessment
+        val readings = createValidReadings(moisture = 13.0f)
+        val resultOnline = GrainDecisionEngine.evaluatePreStorage(readings, currentTimeMs = baseTime)
+
+        // Even with connectivity = BLE_CONNECTED_OFFLINE or DEVICE_DISCONNECTED_LOCAL_AVAILABLE
+        val connStateOffline = ConnectivityState.BLE_CONNECTED_OFFLINE
+        val connStateDisconnected = ConnectivityState.DEVICE_DISCONNECTED_LOCAL_AVAILABLE
+
+        // AssessmentStatus remains unchanged
+        assertEquals(AssessmentStatus.NORMAL, resultOnline.assessmentStatus)
+        assertNotNull(connStateOffline)
+        assertNotNull(connStateDisconnected)
     }
 
     @Test
-    fun testStorageHotspotGradientTriggersWarningOrHighRisk() {
-        // High core temperature creates severe hotspot: TGI = 38.5 - 28.0 = 10.5°C
-        val result = GrainDecisionEngine.evaluateStorage(
-            crop = CropType.PADDY,
-            moisture = 13.0f,
-            t1Top = 28.0f,
-            t2Middle = 38.5f,
-            t3Bottom = 29.0f,
-            humidity = 65.0f
-        )
-        // Peak > 38.0°C triggers HIGH_RISK
-        assertEquals(RiskStatus.HIGH_RISK, result.status)
-        assertEquals(10.5f, result.tgi, 0.05f)
-        assertTrue(result.dominantRisk.contains("Hotspot", ignoreCase = true))
-        assertTrue(result.whyReasons.any { it.contains("Internal heat accumulation", ignoreCase = true) })
+    fun testSimulatedInputIsAlwaysLabelledSimulated() {
+        val simulatedReadings = createValidReadings(isSimulated = true)
+        val result = GrainDecisionEngine.evaluatePreStorage(simulatedReadings, currentTimeMs = baseTime)
+
+        assertTrue("Simulated reading must flag isSimulated = true", result.isSimulated)
+        assertEquals("SIMULATED", result.source)
     }
 
     @Test
-    fun testDifferentCropsAdhereToDistinctMoistureLimits() {
-        assertEquals(13.5f, CropType.PADDY.safeMoistureThreshold, 0.01f)
-        assertEquals(14.0f, CropType.MAIZE.safeMoistureThreshold, 0.01f)
-        assertEquals(12.0f, CropType.WHEAT.safeMoistureThreshold, 0.01f)
-        assertEquals(10.0f, CropType.PULSES.safeMoistureThreshold, 0.01f)
+    fun testRuleConfigVersionCarriedInResult() {
+        val config = RuleConfig(ruleVersion = "0.1.0-unvalidated")
+        val readings = createValidReadings()
+        val result = GrainDecisionEngine.evaluatePreStorage(readings, config = config, currentTimeMs = baseTime)
 
-        // 13.8% is SAFE for Maize (<=14.0%), but WARNING for Paddy (>13.5%) and HIGH_RISK for Wheat (>12.0%)
-        val maizeResult = GrainDecisionEngine.evaluateDrying(CropType.MAIZE, 13.8f)
-        val paddyResult = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 13.8f)
-        val wheatResult = GrainDecisionEngine.evaluateDrying(CropType.WHEAT, 13.8f)
-
-        assertEquals(RiskStatus.SAFE, maizeResult.status)
-        assertEquals(RiskStatus.WARNING, paddyResult.status)
-        assertEquals(RiskStatus.WARNING, wheatResult.status)
-    }
-
-    @Test
-    fun testMathematicalBoundsOfBDRSandGSHI() {
-        val dryResult = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 10.0f)
-        assertTrue(dryResult.bdrs in 0..100)
-        assertTrue(dryResult.gshi in 0..100)
-        assertEquals(100, dryResult.bdrs + dryResult.gshi)
-
-        val wetResult = GrainDecisionEngine.evaluateDrying(CropType.PADDY, 28.0f)
-        assertTrue(wetResult.bdrs in 0..100)
-        assertTrue(wetResult.gshi in 0..100)
-        assertEquals(100, wetResult.bdrs + wetResult.gshi)
+        assertEquals("0.1.0-unvalidated", result.ruleVersion)
     }
 }

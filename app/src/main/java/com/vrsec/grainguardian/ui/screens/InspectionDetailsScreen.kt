@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.screens
+package com.vrsec.grainguardian.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -151,7 +151,7 @@ fun InspectionDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "Moisture", fontSize = 14.sp, color = GrainTextSecondary)
-                        Text(text = "${inspection?.moisture ?: 13.2f}%", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(text = inspection?.moisture?.let { "${it}%" } ?: "--.-%", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))

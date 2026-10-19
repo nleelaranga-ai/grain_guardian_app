@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">గ్రెయిన్ గార్డియన్</string>
     <string name="app_tagline">కోత అనంతర సంసిద్ధత మరియు నిల్వ ఆరోగ్య సమాచారం</string>
@@ -9,4 +9,15 @@
     <string name="select_crop">పంటను ఎంచుకోండి</string>
     <string name="drying_check">ఎండబెట్టడం తనిఖీ</string>
     <string name="storage_check">నిల్వ ఆరోగ్యం తనిఖీ</string>
+
+    <!-- FES v1.0 Telugu Qualitative Guidance Strings -->
+    <string name="drying_needed_guidance">నిల్వకు ముందు మీ ధాన్యాన్ని మరింత ఆరబెట్టాల్సి రావచ్చు.</string>
+    <string name="drying_safe_guidance">వరి ధాన్యం తేమ సురక్షిత నిల్వ పరిమితిలో ఉంది.</string>
+    <string name="crop_not_available_yet">ఇంకా అందుబాటులో లేదు</string>
+    <string name="demo_data_label">డెమో డేటా</string>
+    <string name="status_normal">సాధారణం</string>
+    <string name="status_attention">శ్రద్ధ అవసరం</string>
+    <string name="status_sensor_fault">సెన్సార్ లోపం</string>
+    <string name="status_stale">పాత రీడింగ్</string>
+    <string name="status_insufficient">చాలని డేటా</string>
 </resources>

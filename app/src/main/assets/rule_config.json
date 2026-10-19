@@ -1,0 +1,11 @@
+{
+  "ruleVersion": "0.1.0-unvalidated",
+  "paddy": {
+    "moistureTargetPercent": 13.5,
+    "thermalGradientWarnC": 3.0,
+    "maxTemperatureWarnC": 35.0,
+    "maxReadingAgeMinutes": 30,
+    "minValidReadings": 5,
+    "validated": false
+  }
+}

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.Grain
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -56,11 +58,11 @@ fun CropSelectionScreen(
     val selectedCrop by viewModel.selectedCrop.collectAsState()
 
     val cropItems = listOf(
-        CropItem(CropType.PADDY, "Paddy", "వరి (వరి ధాన్యం)", Icons.Default.Grass, isRecommended = true),
-        CropItem(CropType.MAIZE, "Maize", "మొక్కజొన్న", Icons.Default.Eco),
-        CropItem(CropType.WHEAT, "Wheat", "గోధుమ", Icons.Default.Grain),
-        CropItem(CropType.PULSES, "Pulses", "పప్పు ధాన్యాలు", Icons.Default.Spa),
-        CropItem(CropType.OTHER, "Other / Add Crop", "ఇతర పంటలు", Icons.Default.Eco)
+        CropItem(CropType.PADDY, "Paddy", "వరి (వరి ధాన్యం)", Icons.Default.Grass, isRecommended = true, isAvailable = true),
+        CropItem(CropType.MAIZE, "Maize", "మొక్కజొన్న", Icons.Default.Eco, isAvailable = false),
+        CropItem(CropType.WHEAT, "Wheat", "గోధుమ", Icons.Default.Grain, isAvailable = false),
+        CropItem(CropType.PULSES, "Pulses", "పప్పు ధాన్యాలు", Icons.Default.Spa, isAvailable = false),
+        CropItem(CropType.OTHER, "Other / Add Crop", "ఇతర పంటలు", Icons.Default.Eco, isAvailable = false)
     )
 
     Scaffold(
@@ -97,7 +99,13 @@ fun CropSelectionScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { viewModel.selectCrop(item.crop) }
+                                .then(
+                                    if (item.isAvailable) {
+                                        Modifier.clickable { viewModel.selectCrop(item.crop) }
+                                    } else {
+                                        Modifier.alpha(0.6f)
+                                    }
+                                )
                                 .border(
                                     width = if (isSelected) 2.dp else 1.dp,
                                     color = if (isSelected) GrainPrimaryGreen else GrainDivider,
@@ -121,13 +129,19 @@ fun CropSelectionScreen(
                                         modifier = Modifier
                                             .size(42.dp)
                                             .clip(CircleShape)
-                                            .background(if (isSelected) GrainPrimaryGreen else Color(0xFFF1F5F0)),
+                                            .background(
+                                                if (isSelected) GrainPrimaryGreen
+                                                else if (item.isAvailable) Color(0xFFF1F5F0)
+                                                else Color(0xFFEEEEEE)
+                                            ),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = item.icon,
                                             contentDescription = item.name,
-                                            tint = if (isSelected) Color.White else GrainPrimaryGreen,
+                                            tint = if (isSelected) Color.White
+                                                   else if (item.isAvailable) GrainPrimaryGreen
+                                                   else Color.Gray,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
@@ -158,9 +172,26 @@ fun CropSelectionScreen(
                                                     )
                                                 }
                                             }
+                                            if (!item.isAvailable) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(6.dp))
+                                                        .background(Color(0xFFE0E0E0))
+                                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                ) {
+                                                    Text(
+                                                        text = if (isTelugu) "ఇంకా అందుబాటులో లేదు" else "Not available yet",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Medium,
+                                                        color = Color(0xFF616161)
+                                                    )
+                                                }
+                                            }
                                         }
                                         Text(
-                                            text = "Safe limit: ${item.crop.safeMoistureThreshold}% moisture",
+                                            text = if (item.isAvailable) "Safe limit: ${item.crop.safeMoistureThreshold}% moisture"
+                                                   else if (isTelugu) "పరిశోధన జరుగుతోంది" else "Under validation",
                                             fontSize = 12.sp,
                                             color = GrainTextSecondary
                                         )
@@ -173,6 +204,13 @@ fun CropSelectionScreen(
                                         contentDescription = "Selected",
                                         tint = GrainPrimaryGreen,
                                         modifier = Modifier.size(24.dp)
+                                    )
+                                } else if (!item.isAvailable) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = "Locked",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 } else {
                                     Icon(
@@ -202,5 +240,6 @@ private data class CropItem(
     val name: String,
     val teluguName: String,
     val icon: ImageVector,
-    val isRecommended: Boolean = false
+    val isRecommended: Boolean = false,
+    val isAvailable: Boolean = true
 )

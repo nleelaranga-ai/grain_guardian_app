@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.data.model
+package com.vrsec.grainguardian.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,7 +9,7 @@ data class GrainInspectionEntity(
     val id: Long = 0,
     val cropName: String = "Paddy",
     val mode: String = "Storage Check", // "Drying Check" or "Storage Check"
-    val moisture: Float = 13.2f,
+    val moisture: Float = 0.0f,
     val t1Top: Float = 29.0f,
     val t2Middle: Float = 31.0f,
     val t3Bottom: Float = 32.0f,
