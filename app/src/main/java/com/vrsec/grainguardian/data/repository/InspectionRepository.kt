@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -183,5 +185,21 @@ class InspectionRepository(
             )
         )
         benchmarkData.forEach { dao.insertInspection(it) }
+    }
+
+    suspend fun exportInspectionsToCsv(context: Context): File = withContext(Dispatchers.IO) {
+        val inspections = dao.getAllInspectionsList()
+        val exportDir = File(context.cacheDir, "exports").apply { mkdirs() }
+        val file = File(exportDir, "grainguardian_inspections_${System.currentTimeMillis()}.csv")
+
+        file.printWriter().use { out ->
+            out.println("ID,UUID,Timestamp,FormattedDate,CropName,Mode,MoisturePct,T1TopC,T2MiddleC,T3BottomC,HumidityRH,Status,RiskScore,DominantRisk,SyncState,Recommendations")
+            for (rec in inspections) {
+                val cleanRecs = rec.recommendationsJson.replace(",", ";").replace("\"", "'")
+                val cleanDominant = rec.dominantRisk.replace(",", ";")
+                out.println("${rec.id},\"${rec.uuid}\",${rec.timestamp},\"${rec.formattedDate}\",\"${rec.cropName}\",\"${rec.mode}\",${rec.moisture},${rec.t1Top},${rec.t2Middle},${rec.t3Bottom},${rec.humidity},\"${rec.status}\",${rec.riskScore},\"$cleanDominant\",\"${rec.syncState}\",\"$cleanRecs\"")
+            }
+        }
+        file
     }
 }

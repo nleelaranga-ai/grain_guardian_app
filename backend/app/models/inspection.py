@@ -6,6 +6,7 @@ class Inspection(Base):
     __tablename__ = "inspections"
 
     id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(String(64), unique=True, index=True, nullable=True)
     device_mac = Column(String(32), index=True, nullable=False)
     seq_id = Column(Integer, nullable=True)
     timestamp = Column(BigInteger, index=True, nullable=False)

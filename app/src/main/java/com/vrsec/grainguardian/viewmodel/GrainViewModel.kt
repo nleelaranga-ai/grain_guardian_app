@@ -1,7 +1,9 @@
 package com.vrsec.grainguardian.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.io.File
 import com.vrsec.grainguardian.data.bluetooth.BleConnectionState
 import com.vrsec.grainguardian.data.bluetooth.ProbeSensorData
 import com.vrsec.grainguardian.data.bluetooth.DeviceInfo
@@ -358,5 +360,9 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
         viewModelScope.launch {
             repository.syncToCloud(endpoint)
         }
+    }
+
+    suspend fun exportInspectionsToCsv(context: Context): File {
+        return repository.exportInspectionsToCsv(context)
     }
 }

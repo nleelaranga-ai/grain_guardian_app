@@ -37,6 +37,8 @@ class CloudSyncManager(
 
         for (item in inspections) {
             val rec = JSONObject()
+            rec.put("uuid", item.uuid)
+            rec.put("sync_uuid", item.uuid)
             rec.put("seq_id", item.id.toInt())
             rec.put("timestamp", item.timestamp)
             rec.put("crop_name", item.cropName)
@@ -64,7 +66,8 @@ class CloudSyncManager(
         val endpointUrl = customEndpoint?.ifBlank { null } ?: defaultEndpoint
 
         try {
-            val inspections = dao.getAllInspectionsList()
+            val pending = dao.getPendingForSync()
+            val inspections = if (pending.isNotEmpty()) pending else dao.getAllInspectionsList()
             if (inspections.isEmpty()) {
                 val state = CloudSyncState.Success(0, 0)
                 _syncState.value = state
@@ -93,6 +96,12 @@ class CloudSyncManager(
                 val respJson = JSONObject(responseText)
                 val inserted = respJson.optInt("inserted", 0)
                 val skipped = respJson.optInt("duplicates_skipped", 0)
+
+                // Update local Room database records to CONFIRMED
+                for (item in inspections) {
+                    dao.updateSyncState(item.id, "CONFIRMED")
+                }
+
                 val state = CloudSyncState.Success(inserted, skipped)
                 _syncState.value = state
                 state

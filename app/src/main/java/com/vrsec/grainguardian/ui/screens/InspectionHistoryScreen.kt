@@ -7,13 +7,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vrsec.grainguardian.data.model.GrainInspectionEntity
@@ -53,6 +57,10 @@ fun InspectionHistoryScreen(
         HistoryFilter.DEVICE_PROBLEMS -> deviceProblemInspections
     }
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var exportMessage by remember { mutableStateOf<String?>(null) }
+
     Scaffold(
         topBar = {
             GrainTopBar(
@@ -76,6 +84,67 @@ fun InspectionHistoryScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            // Header Stats & Export Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isTelugu) "మొత్తం: ${currentList.size} రికార్డులు" else "Total: ${currentList.size} records",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = GrainTextSecondary
+                )
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                val file = viewModel.exportInspectionsToCsv(context)
+                                exportMessage = if (isTelugu) "CSV గా ఎగుమతి చేయబడింది (${file.name})" else "Exported to ${file.name}"
+                            } catch (e: Exception) {
+                                exportMessage = "Export failed: ${e.message}"
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    enabled = currentList.isNotEmpty()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FileDownload,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = GrainPrimaryGreen
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = if (isTelugu) "CSV ఎగుమతి" else "Export CSV",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GrainPrimaryGreen
+                    )
+                }
+            }
+
+            exportMessage?.let { msg ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFF0FDF4),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+                ) {
+                    Text(
+                        text = msg,
+                        fontSize = 11.sp,
+                        color = GrainDarkGreen,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+            }
+
             // Filter Chips
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

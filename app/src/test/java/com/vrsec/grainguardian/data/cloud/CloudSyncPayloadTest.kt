@@ -57,6 +57,8 @@ class CloudSyncPayloadTest {
         assertEquals(1, records.length())
 
         val rec = records.getJSONObject(0)
+        assertEquals(sampleEntity.uuid, rec.getString("uuid"))
+        assertEquals(sampleEntity.uuid, rec.getString("sync_uuid"))
         assertEquals(101, rec.getInt("seq_id"))
         assertEquals(1792348200000L, rec.getLong("timestamp"))
         assertEquals("Paddy", rec.getString("crop_name"))
@@ -74,5 +76,37 @@ class CloudSyncPayloadTest {
         val jsonStr = syncManager.buildSyncPayload("24:6F:28:AB:CD:EF", emptyList())
         val root = JSONObject(jsonStr)
         assertEquals(0, root.getJSONArray("records").length())
+    }
+
+    @Test
+    fun testCsvSerializationFormatting() {
+        val sampleEntity = GrainInspectionEntity(
+            id = 42L,
+            cropName = "Paddy",
+            mode = "Storage Check",
+            moisture = 13.5f,
+            t1Top = 28.5f,
+            t2Middle = 29.0f,
+            t3Bottom = 29.5f,
+            humidity = 64.0f,
+            status = "SAFE",
+            riskScore = 14,
+            dominantRisk = "Moisture Optimal",
+            recommendationsJson = "Safe for storage|Inspect again in 7 days",
+            timestamp = 1792348200000L,
+            formattedDate = "19 Oct 2026, 10:00 AM",
+            syncState = "CONFIRMED"
+        )
+
+        val header = "ID,UUID,Timestamp,FormattedDate,CropName,Mode,MoisturePct,T1TopC,T2MiddleC,T3BottomC,HumidityRH,Status,RiskScore,DominantRisk,SyncState,Recommendations"
+        val cleanRecs = sampleEntity.recommendationsJson.replace(",", ";").replace("\"", "'")
+        val cleanDominant = sampleEntity.dominantRisk.replace(",", ";")
+        val row = "${sampleEntity.id},\"${sampleEntity.uuid}\",${sampleEntity.timestamp},\"${sampleEntity.formattedDate}\",\"${sampleEntity.cropName}\",\"${sampleEntity.mode}\",${sampleEntity.moisture},${sampleEntity.t1Top},${sampleEntity.t2Middle},${sampleEntity.t3Bottom},${sampleEntity.humidity},\"${sampleEntity.status}\",${sampleEntity.riskScore},\"$cleanDominant\",\"${sampleEntity.syncState}\",\"$cleanRecs\""
+
+        assertTrue(header.startsWith("ID,UUID"))
+        assertTrue(row.contains("42"))
+        assertTrue(row.contains("Paddy"))
+        assertTrue(row.contains("CONFIRMED"))
+        assertTrue(row.contains("13.5"))
     }
 }
