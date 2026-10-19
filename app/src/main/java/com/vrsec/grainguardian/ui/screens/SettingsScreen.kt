@@ -239,6 +239,49 @@ fun SettingsScreen(
                 }
             }
 
+            // Reduce Motion (Disable Flying Leaves Touch Effect)
+            val leafBurstState = com.vrsec.grainguardian.ui.effects.LocalLeafBurstState.current
+            var reduceMotion by leafBurstState.reduceMotion
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GrainSurface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (isTelugu) "కదలికలను తగ్గించండి (Reduce Motion)" else "Reduce Motion",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrainTextPrimary
+                        )
+                        Text(
+                            text = if (isTelugu) "స్పర్శించినప్పుడు ఆకుల యానిమేషన్ ప్రభావాన్ని ఆపివేస్తుంది" 
+                            else "Disable flying leaves animation touch feedback",
+                            fontSize = 12.sp,
+                            color = GrainTextSecondary
+                        )
+                    }
+
+                    Switch(
+                        checked = reduceMotion,
+                        onCheckedChange = { reduceMotion = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = GrainPrimaryGreen
+                        )
+                    )
+                }
+            }
+
             // Developer Sandbox Mode (Probe Emulation)
             Card(
                 modifier = Modifier.fillMaxWidth(),
