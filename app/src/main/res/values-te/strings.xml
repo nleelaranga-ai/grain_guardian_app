@@ -20,4 +20,70 @@
     <string name="status_sensor_fault">సెన్సార్ లోపం</string>
     <string name="status_stale">పాత రీడింగ్</string>
     <string name="status_insufficient">చాలని డేటా</string>
+
+    <!-- Screen 19: Account (Telugu) -->
+    <string name="account_title">రైతు ప్రొఫైల్ &amp; ఖాతా</string>
+    <string name="farmer_name_label">రైతు పేరు</string>
+    <string name="farmer_phone_label">సంప్రదింపు ఫోన్</string>
+    <string name="farmer_location_label">గ్రామం / మండలం</string>
+    <string name="storage_locations_configured">నిల్వ ప్రదేశాలు</string>
+    <string name="app_operating_mode">ఆపరేటింగ్ విధానం</string>
+    <string name="offline_first_mode">ఆఫ్‌లైన్-ఫస్ట్ (ఇంటర్నెట్ అవసరం లేదు)</string>
+
+    <!-- Screen 20: Storage Locations (Telugu) -->
+    <string name="storage_locations_title">ధాన్యం నిల్వ ప్రదేశాలు</string>
+    <string name="storage_locations_desc">మీ గోదాములు, గన్నీ సంచుల దొంతరలు మరియు కళ్ళం ప్రదేశాలను నిర్వహించండి.</string>
+    <string name="add_location_btn">నిల్వ ప్రదేశాన్ని జోడించండి</string>
+    <string name="location_active_label">ప్రస్తుత ప్రదేశం</string>
+
+    <!-- Screen 21: Sync Status (Telugu) -->
+    <string name="sync_status_title">క్లౌడ్ సమకాలీకరణ (Sync)</string>
+    <string name="sync_status_desc">కేంద్ర సర్వర్‌కు పంపడానికి వేచి ఉన్న స్థానిక రికార్డులను సమీక్షించండి.</string>
+    <string name="pending_sync_label">అప్‌లోడ్ కోసం వేచి ఉన్నవి</string>
+    <string name="confirmed_sync_label">సింక్ చేయబడినవి</string>
+    <string name="total_records_label">మొత్తం స్థానిక రికార్డులు</string>
+    <string name="sync_now_action">అన్ని రికార్డులను ఇప్పుడే సింక్ చేయండి</string>
+
+    <!-- Screen 22: Alerts List (Telugu) -->
+    <string name="alerts_list_title">హెచ్చరికలు &amp; అలర్ట్‌లు</string>
+    <string name="filter_all">అన్నీ</string>
+    <string name="filter_high_moisture">అధిక తేమ</string>
+    <string name="filter_hotspots">వేడి మచ్చలు (Hotspots)</string>
+    <string name="filter_faults">సెన్సార్ లోపాలు</string>
+    <string name="no_alerts_found">ప్రస్తుతం ఎటువంటి ప్రమాద హెచ్చరికలు లేవు. ధాన్యం నిల్వ సాధారణ స్థితిలో ఉంది.</string>
+
+    <!-- Screen 23: Technician Sign-In (Telugu) -->
+    <string name="technician_signin_title">టెక్నీషియన్ యాక్సెస్</string>
+    <string name="technician_restricted_banner_title">క్యాలిబ్రేషన్ పరిమితం చేయబడింది</string>
+    <string name="technician_restricted_banner_desc">హార్డ్‌వేర్ సెన్సార్ క్యాలిబ్రేషన్ అధీకృత టెక్నీషియన్లకు మాత్రమే అనుమతించబడింది. క్షేత్రస్థాయి వినియోగదారులు ఆఫ్‌లైన్ తనిఖీ మోడ్‌లో పని చేస్తారు.</string>
+    <string name="technician_pin_label">టెక్నీషియన్ పిన్ (PIN)</string>
+    <string name="technician_signin_btn">డయాగ్నోస్టిక్స్ అన్‌లాక్ చేయండి</string>
+    <string name="technician_sandbox_bypass_btn">డయాగ్నోస్టిక్స్ చూడండి (సాండ్‌బాక్స్ మోడ్)</string>
+
+    <!-- Screen 24: Technician Diagnostics (Telugu) -->
+    <string name="technician_diag_title">ప్రోబ్ డయాగ్నోస్టిక్స్</string>
+    <string name="telemetry_raw_header">రా హార్డ్‌వేర్ టెలిమెట్రీ</string>
+    <string name="ds18b20_status_label">DS18B20 1-వైర్ స్థితి</string>
+    <string name="dht_pin_label">DHT11 (పిన్ 27) స్థితి</string>
+    <string name="moisture_adc_label">అనలాగ్ తేమ ADC (పిన్ 34)</string>
+    <string name="battery_calc_label">బ్యాటరీ వోల్టేజ్</string>
+    <string name="calibration_curve_label">క్యాలిబ్రేషన్ కర్వ్ (చదవడం మాత్రమే)</string>
+
+    <!-- Screen 25: Privacy Data (Telugu) -->
+    <string name="privacy_title">గోప్యత &amp; డేటా పాలసీ</string>
+    <string name="privacy_local_storage_title">స్థానిక నిల్వ హామీ</string>
+    <string name="privacy_local_storage_desc">అన్ని తేమ, ఉష్ణోగ్రత మరియు తనిఖీ రికార్డులు మీ ఫోన్ లోకల్ రూమ్ డేటాబేస్‌లోనే భద్రంగా ఉంటాయి.</string>
+    <string name="privacy_zero_telemetry_title">ఎటువంటి ట్రాకింగ్ లేదు</string>
+    <string name="privacy_zero_telemetry_desc">ఈ యాప్‌లో ఎటువంటి వాణిజ్య ప్రకటనల ట్రాకర్లు లేదా విశ్లేషణ సాధనాలు లేవు.</string>
+
+    <!-- Screen 26: Permission Explainer (Telugu) -->
+    <string name="permissions_title">యాప్ అనుమతులు</string>
+    <string name="permissions_desc">గ్రెయిన్ గార్డియన్‌కు పరికర అనుమతులు ఎందుకు అవసరమో తెలుసుకోండి.</string>
+    <string name="perm_bluetooth_title">బ్లూటూత్ లో ఎనర్జీ (సమీప పరికరాలు)</string>
+    <string name="perm_bluetooth_desc">గ్రెయిన్ గార్డియన్ సెన్సార్ ప్రోబ్‌ను కనుగొని కనెక్ట్ చేయడానికి అవసరం.</string>
+    <string name="perm_location_title">లొకేషన్ (Android 11 మరియు అంతకంటే ముందు)</string>
+    <string name="perm_location_desc">బ్లూటూత్ స్కానింగ్ కోసం Android OS ద్వారా తప్పనిసరి. మీ GPS లొకేషన్ ఎప్పుడూ రికార్డ్ చేయబడదు.</string>
+    <string name="perm_notification_title">నోటిఫికేషన్లు</string>
+    <string name="perm_notification_desc">అధిక తేమ లేదా వేడి మచ్చల ప్రమాదం ఉన్నప్పుడు మిమ్మల్ని హెచ్చరించడానికి అవసరం.</string>
+    <string name="open_settings_btn">ఆండ్రాయిడ్ సెట్టింగ్స్ తెరవండి</string>
 </resources>

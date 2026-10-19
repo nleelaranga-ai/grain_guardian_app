@@ -62,8 +62,8 @@ fun DashboardScreen(
                 showBackButton = false,
                 showMenuButton = true,
                 showNotification = true,
-                onMenuClick = { onNavigate(Screen.Settings.route) },
-                onNotificationClick = { onNavigate(Screen.InspectionHistory.route) }
+                onMenuClick = { onNavigate(Screen.Account.route) },
+                onNotificationClick = { onNavigate(Screen.AlertsList.route) }
             )
         },
         bottomBar = {

@@ -236,5 +236,72 @@ fun GrainNavigation(
                 onBack = { navController.popBackStack() }
             )
         }
+
+        composable(Screen.Account.route) {
+            AccountScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.StorageLocations.route) {
+            StorageLocationsScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.SyncStatus.route) {
+            SyncStatusScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.AlertsList.route) {
+            AlertsListScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() },
+                onAlertClick = { id ->
+                    navController.navigate(Screen.InspectionDetails.createRoute(id))
+                }
+            )
+        }
+
+        composable(Screen.TechnicianSignIn.route) {
+            TechnicianSignInScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.TechnicianDiagnostics.route) {
+            TechnicianDiagnosticsScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.PrivacyData.route) {
+            PrivacyDataScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.PermissionExplainer.route) {
+            PermissionExplainerScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
     }
 }

@@ -20,4 +20,70 @@
     <string name="status_sensor_fault">Sensor Fault</string>
     <string name="status_stale">Stale Reading</string>
     <string name="status_insufficient">Insufficient Data</string>
+
+    <!-- Screen 19: Account -->
+    <string name="account_title">Farmer Profile &amp; Account</string>
+    <string name="farmer_name_label">Farmer Name</string>
+    <string name="farmer_phone_label">Contact Phone</string>
+    <string name="farmer_location_label">Farm Village / Mandal</string>
+    <string name="storage_locations_configured">Configured Storage Locations</string>
+    <string name="app_operating_mode">Operating Mode</string>
+    <string name="offline_first_mode">Offline-First (No Internet Needed)</string>
+
+    <!-- Screen 20: Storage Locations -->
+    <string name="storage_locations_title">Storage Locations</string>
+    <string name="storage_locations_desc">Manage your farm granaries, sheds, and bag stacks for batch tracking.</string>
+    <string name="add_location_btn">Add Storage Location</string>
+    <string name="location_active_label">Active Location</string>
+
+    <!-- Screen 21: Sync Status -->
+    <string name="sync_status_title">Cloud Synchronization</string>
+    <string name="sync_status_desc">Review local records pending upload to the central warehouse server.</string>
+    <string name="pending_sync_label">Pending Upload</string>
+    <string name="confirmed_sync_label">Confirmed Synced</string>
+    <string name="total_records_label">Total Local Records</string>
+    <string name="sync_now_action">Sync All Records Now</string>
+
+    <!-- Screen 22: Alerts List -->
+    <string name="alerts_list_title">Warnings &amp; Alerts</string>
+    <string name="filter_all">All</string>
+    <string name="filter_high_moisture">High Moisture</string>
+    <string name="filter_hotspots">Hotspots</string>
+    <string name="filter_faults">Sensor Faults</string>
+    <string name="no_alerts_found">No active warnings. Grain conditions are normal.</string>
+
+    <!-- Screen 23: Technician Sign-In -->
+    <string name="technician_signin_title">Technician Access</string>
+    <string name="technician_restricted_banner_title">Calibration Restricted</string>
+    <string name="technician_restricted_banner_desc">Field calibration mode requires authorized hardware technician access. Field users operate in validated offline inspection mode.</string>
+    <string name="technician_pin_label">Technician PIN</string>
+    <string name="technician_signin_btn">Unlock Diagnostics</string>
+    <string name="technician_sandbox_bypass_btn">Enter Diagnostics (Sandbox Mode)</string>
+
+    <!-- Screen 24: Technician Diagnostics -->
+    <string name="technician_diag_title">Probe Diagnostics</string>
+    <string name="telemetry_raw_header">Raw Hardware Telemetry</string>
+    <string name="ds18b20_status_label">DS18B20 1-Wire Status</string>
+    <string name="dht_pin_label">DHT11 (Pin 27) Status</string>
+    <string name="moisture_adc_label">Analog Moisture ADC (Pin 34)</string>
+    <string name="battery_calc_label">Battery Voltage</string>
+    <string name="calibration_curve_label">Calibration Curve (Read-Only)</string>
+
+    <!-- Screen 25: Privacy Data -->
+    <string name="privacy_title">Privacy &amp; Data Policy</string>
+    <string name="privacy_local_storage_title">Local-First Storage Guarantee</string>
+    <string name="privacy_local_storage_desc">All moisture, temperature, and inspection records stay encrypted inside your phone\'s local Room database.</string>
+    <string name="privacy_zero_telemetry_title">Zero Background Tracking</string>
+    <string name="privacy_zero_telemetry_desc">No advertising trackers, analytics SDKs, or background telemetry are bundled in this application.</string>
+
+    <!-- Screen 26: Permission Explainer -->
+    <string name="permissions_title">Device Permissions</string>
+    <string name="permissions_desc">Why GrainGuardian requests specific Android device capabilities.</string>
+    <string name="perm_bluetooth_title">Bluetooth Low Energy (Nearby Devices)</string>
+    <string name="perm_bluetooth_desc">Required to scan for and establish secure BLE connection with the physical GrainGuardian probe.</string>
+    <string name="perm_location_title">Location (Android 11 &amp; Earlier)</string>
+    <string name="perm_location_desc">Mandated by Android OS to scan for Bluetooth beacons. Your physical GPS coordinates are never recorded or transmitted.</string>
+    <string name="perm_notification_title">Notifications</string>
+    <string name="perm_notification_desc">Allows alerting you when high moisture or grain hotspot risks are detected during monitoring.</string>
+    <string name="open_settings_btn">Open Android Settings</string>
 </resources>

@@ -416,6 +416,163 @@ fun SettingsScreen(
                 }
             }
 
+            // More Modules & Management
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GrainSurface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = if (isTelugu) "మరిన్ని సేవలు & నిర్వహణ" else "Features & Management",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GrainTextPrimary
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Farmer Profile
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.Account.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "రైతు ప్రొఫైల్ & ఖాతా" else "Farmer Profile & Account",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Storage Locations
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.StorageLocations.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "ధాన్యం నిల్వ ప్రదేశాలు (షెడ్లు & సంచులు)" else "Storage Granaries & Sheds",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Cloud Sync Center
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.SyncStatus.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "క్లౌడ్ సమకాలీకరణ స్థితి" else "Cloud Sync Center",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Warnings & Alerts
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.AlertsList.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "హెచ్చరికలు & అలర్ట్‌ల కేంద్రం" else "Warnings & Alerts Center",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Device Permissions Explainer
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.PermissionExplainer.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "యాప్ అనుమతుల వివరాలు (BLE & లొకేషన్)" else "Device Permissions Explainer",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Privacy & Data Policy
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.PrivacyData.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "గోప్యత & స్థానిక డేటా హామీ" else "Privacy & Local Data Policy",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Divider(color = GrainDivider, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Technician Gate
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate(Screen.TechnicianSignIn.route) }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "హార్డ్‌వేర్ టెక్నీషియన్ యాక్సెస్" else "Hardware Technician Access",
+                            fontSize = 13.sp,
+                            color = GrainTextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = GrainTextSecondary, modifier = Modifier.size(16.dp))
+                    }
+                }
+            }
+
             // About App
             Card(
                 modifier = Modifier.fillMaxWidth(),

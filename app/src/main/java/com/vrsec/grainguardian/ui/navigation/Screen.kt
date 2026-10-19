@@ -1,4 +1,4 @@
-﻿package com.vrsec.grainguardian.ui.navigation
+package com.vrsec.grainguardian.ui.navigation
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -21,4 +21,12 @@ sealed class Screen(val route: String) {
     object Help : Screen("help")
     object Settings : Screen("settings")
     object DeviceInfo : Screen("device_info")
+    object Account : Screen("account")
+    object StorageLocations : Screen("storage_locations")
+    object SyncStatus : Screen("sync_status")
+    object AlertsList : Screen("alerts_list")
+    object TechnicianSignIn : Screen("technician_sign_in")
+    object TechnicianDiagnostics : Screen("technician_diagnostics")
+    object PrivacyData : Screen("privacy_data")
+    object PermissionExplainer : Screen("permission_explainer")
 }
