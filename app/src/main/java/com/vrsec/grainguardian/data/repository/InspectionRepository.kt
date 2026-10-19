@@ -95,6 +95,14 @@ class InspectionRepository(
         bleManager.clearDeviceHistory()
     }
 
+    fun pingProbe(): Boolean {
+        return bleManager.pingDevice()
+    }
+
+    fun triggerTestBeep(): Boolean {
+        return bleManager.triggerTestBeep()
+    }
+
     suspend fun syncToCloud(endpoint: String? = null): CloudSyncState {
         return cloudSyncManager.syncInspectionsToCloud(customEndpoint = endpoint)
     }

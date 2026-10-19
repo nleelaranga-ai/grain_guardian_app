@@ -66,9 +66,89 @@ class BleHistorySyncTest {
         val cmdInfo = "CMD:INFO\n"
         val cmdSync = "CMD:SYNC\n"
         val cmdClear = "CMD:CLEAR_HISTORY\n"
+        val cmdPing = "CMD:PING\n"
+        val cmdBeep = "CMD:BEEP\n"
 
         assertEquals("CMD:INFO", cmdInfo.trim())
         assertEquals("CMD:SYNC", cmdSync.trim())
         assertEquals("CMD:CLEAR_HISTORY", cmdClear.trim())
+        assertEquals("CMD:PING", cmdPing.trim())
+        assertEquals("CMD:BEEP", cmdBeep.trim())
+    }
+
+    @Test
+    fun testDeviceInfoPacketWithProbesAndOled() {
+        val infoPacket = "INFO:VER=2.0;RECS=12;UP=3600;PROBES=3;OLED=1"
+        assertTrue(infoPacket.startsWith("INFO:"))
+        val body = infoPacket.substring(5)
+        var ver = ""
+        var recs = 0
+        var up = 0L
+        var probes = 0
+        var oled = false
+
+        for (part in body.split(";")) {
+            val kv = part.split("=")
+            if (kv.size == 2) {
+                when (kv[0].trim().uppercase()) {
+                    "VER" -> ver = kv[1].trim()
+                    "RECS" -> recs = kv[1].trim().toIntOrNull() ?: 0
+                    "UP" -> up = kv[1].trim().toLongOrNull() ?: 0L
+                    "PROBES" -> probes = kv[1].trim().toIntOrNull() ?: 0
+                    "OLED" -> oled = kv[1].trim() == "1"
+                }
+            }
+        }
+
+        assertEquals("2.0", ver)
+        assertEquals(12, recs)
+        assertEquals(3600L, up)
+        assertEquals(3, probes)
+        assertTrue(oled)
+    }
+
+    @Test
+    fun testMoistureVoltageClampingLimits() {
+        // Safe standard paddy reading: ~2100 mV
+        val standardMoisture = BleManager.convertMillivoltsToMoisture(2100)
+        assertEquals(13.5f, standardMoisture, 0.01f)
+
+        // Extremely low mV (simulated saturated wet water/fault) clamps to maximum
+        val wetMoisture = BleManager.convertMillivoltsToMoisture(200)
+        assertTrue(wetMoisture <= 32.0f)
+        assertTrue(wetMoisture >= 30.0f)
+
+        // Zero mV fault returns 0.0
+        val zeroMoisture = BleManager.convertMillivoltsToMoisture(0)
+        assertEquals(0.0f, zeroMoisture, 0.001f)
+
+        // High mV (dry air: ~2800 mV) clamps to minimum safe bound
+        val dryMoisture = BleManager.convertMillivoltsToMoisture(3200)
+        assertEquals(8.0f, dryMoisture, 0.001f)
+    }
+
+    @Test
+    fun testStatusFlagBitmaskEvaluation() {
+        // Bit0: T1, Bit1: T2, Bit2: T3, Bit3: Moisture, Bit4: DHT, Bit5: OLED, Bit6: HOTSPOT
+        val flagsAllNormal = 0b00111111 // 63: T1..T3 + Moisture + DHT + OLED
+        val flagsHotspot = 0b01111111   // 127: All sensors + Hotspot active
+
+        val isT1Ok = (flagsAllNormal and (1 shl 0)) != 0
+        val isT2Ok = (flagsAllNormal and (1 shl 1)) != 0
+        val isT3Ok = (flagsAllNormal and (1 shl 2)) != 0
+        val isMoistureOk = (flagsAllNormal and (1 shl 3)) != 0
+        val isDhtOk = (flagsAllNormal and (1 shl 4)) != 0
+        val isOledOk = (flagsAllNormal and (1 shl 5)) != 0
+        val isHotspotNormal = (flagsAllNormal and (1 shl 6)) != 0
+        val isHotspotActive = (flagsHotspot and (1 shl 6)) != 0
+
+        assertTrue(isT1Ok)
+        assertTrue(isT2Ok)
+        assertTrue(isT3Ok)
+        assertTrue(isMoistureOk)
+        assertTrue(isDhtOk)
+        assertTrue(isOledOk)
+        assertFalse(isHotspotNormal)
+        assertTrue(isHotspotActive)
     }
 }

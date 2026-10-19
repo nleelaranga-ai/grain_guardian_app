@@ -37,7 +37,9 @@ data class ProbeSensorData(
 data class DeviceInfo(
     val firmwareVersion: String = "2.0",
     val recordCount: Int = 0,
-    val uptimeSeconds: Long = 0L
+    val uptimeSeconds: Long = 0L,
+    val discoveredProbes: Int = 3,
+    val hasOled: Boolean = true
 )
 
 sealed interface SyncStatus {
@@ -382,17 +384,31 @@ class BleManager(private val context: Context) {
         sendCommand("CMD:CLEAR_HISTORY\n")
     }
 
+    fun pingDevice(): Boolean {
+        return sendCommand("CMD:PING\n")
+    }
+
+    fun triggerTestBeep(): Boolean {
+        return sendCommand("CMD:BEEP\n")
+    }
+
     fun parseSensorPacket(bytes: ByteArray) {
         try {
             val text = String(bytes, Charsets.UTF_8).trim()
             if (text.isEmpty() || text == "GrainGuardian Ready") return
 
-            // 1. INFO Packet: INFO:VER=2.0;RECS=5;UP=12400
+            if (text == "PONG" || text == "BEEP:OK") {
+                return
+            }
+
+            // 1. INFO Packet: INFO:VER=2.0;RECS=5;UP=12400;PROBES=3;OLED=1
             if (text.startsWith("INFO:")) {
                 val body = text.substring(5)
                 var ver = "2.0"
                 var recs = 0
                 var up = 0L
+                var probes = 3
+                var oled = true
                 val parts = body.split(";")
                 for (part in parts) {
                     val kv = part.split("=")
@@ -401,12 +417,20 @@ class BleManager(private val context: Context) {
                             "VER" -> ver = kv[1].trim()
                             "RECS" -> recs = kv[1].trim().toIntOrNull() ?: 0
                             "UP" -> up = kv[1].trim().toLongOrNull() ?: 0L
+                            "PROBES" -> probes = kv[1].trim().toIntOrNull() ?: 3
+                            "OLED" -> oled = kv[1].trim() == "1"
                         }
                     }
                 }
                 lastDeviceUptimeSec = up
                 currentSyncWallClock = System.currentTimeMillis()
-                _deviceInfo.value = DeviceInfo(firmwareVersion = ver, recordCount = recs, uptimeSeconds = up)
+                _deviceInfo.value = DeviceInfo(
+                    firmwareVersion = ver,
+                    recordCount = recs,
+                    uptimeSeconds = up,
+                    discoveredProbes = probes,
+                    hasOled = oled
+                )
                 return
             }
 
@@ -678,7 +702,15 @@ class BleManager(private val context: Context) {
             when (trimmed) {
                 "CMD:INFO" -> {
                     delay(150)
-                    parseSensorPacket("INFO:VER=2.0;RECS=3;UP=3600".toByteArray(Charsets.UTF_8))
+                    parseSensorPacket("INFO:VER=2.0;RECS=3;UP=3600;PROBES=3;OLED=1".toByteArray(Charsets.UTF_8))
+                }
+                "CMD:PING" -> {
+                    delay(50)
+                    parseSensorPacket("PONG".toByteArray(Charsets.UTF_8))
+                }
+                "CMD:BEEP" -> {
+                    delay(50)
+                    parseSensorPacket("BEEP:OK".toByteArray(Charsets.UTF_8))
                 }
                 "CMD:SYNC" -> {
                     delay(150)

@@ -35,7 +35,9 @@ fun TechnicianDiagnosticsScreen(
     val isConnected by viewModel.isProbeConnected.collectAsState()
     val sensorData by viewModel.liveSensorData.collectAsState()
     val deviceStatus by viewModel.deviceStatus.collectAsState()
+    val deviceInfo by viewModel.deviceInfo.collectAsState()
     val isSandbox by viewModel.isDeveloperSandboxEnabled.collectAsState()
+    var diagnosticFeedback by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -95,6 +97,138 @@ fun TechnicianDiagnosticsScreen(
                             fontSize = 11.sp,
                             color = GrainTextSecondary
                         )
+                    }
+                }
+            }
+
+            // Hardware Diagnostic & Actuator Controls
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = GrainSurface)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isTelugu) "హార్డ్‌వేర్ బస్ & యాక్చువేటర్ పరీక్ష" else "Hardware Bus & Actuator Testing",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = GrainTextPrimary
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = if (isConnected || isSandbox) GrainLightGreen else Color(0xFFF3F4F6)
+                        ) {
+                            Text(
+                                text = "FW v${deviceInfo?.firmwareVersion ?: "2.0"}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isConnected || isSandbox) GrainDarkGreen else GrainTextSecondary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(if (isTelugu) "1-వైర్ ప్రోబ్‌లు:" else "1-Wire Probes:", fontSize = 11.sp, color = GrainTextSecondary)
+                            Text(
+                                text = "${deviceInfo?.discoveredProbes ?: 3} Discovered",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                color = GrainDarkGreen,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        Column {
+                            Text(if (isTelugu) "OLED డిస్ప్లే:" else "OLED (0x3C):", fontSize = 11.sp, color = GrainTextSecondary)
+                            Text(
+                                text = if (deviceInfo?.hasOled != false) "Online" else "Not Present",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                color = if (deviceInfo?.hasOled != false) GrainPrimaryGreen else GrainTextSecondary,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        Column {
+                            Text(if (isTelugu) "అప్‌టైమ్:" else "Uptime:", fontSize = 11.sp, color = GrainTextSecondary)
+                            Text(
+                                text = "${deviceInfo?.uptimeSeconds ?: 0}s",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                color = GrainTextPrimary,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+
+                    diagnosticFeedback?.let { msg ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFF0FDF4),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = msg,
+                                fontSize = 11.sp,
+                                color = GrainDarkGreen,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                viewModel.pingProbe()
+                                diagnosticFeedback = if (isTelugu) "పింగ్ పంపబడింది (CMD:PING -> PONG)" else "Ping sent to probe (CMD:PING -> PONG)"
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = if (isTelugu) "ప్రోబ్ పింగ్" else "Ping Probe",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                viewModel.triggerTestBeep()
+                                diagnosticFeedback = if (isTelugu) "బజ్జర్ బీప్ ఆదేశం పంపబడింది (CMD:BEEP)" else "Buzzer chirp triggered (CMD:BEEP)"
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GrainPrimaryGreen,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = if (isTelugu) "బీప్ టెస్ట్ (GPIO 25)" else "Test Buzzer",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

@@ -346,6 +346,14 @@ class GrainViewModel(private val repository: InspectionRepository) : ViewModel()
         repository.clearDeviceHistory()
     }
 
+    fun pingProbe(): Boolean {
+        return repository.pingProbe()
+    }
+
+    fun triggerTestBeep(): Boolean {
+        return repository.triggerTestBeep()
+    }
+
     fun syncToCloud(endpoint: String? = null) {
         viewModelScope.launch {
             repository.syncToCloud(endpoint)
