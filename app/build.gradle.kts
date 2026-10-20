@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.vrsec.grainguardian"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 33
         versionCode = 1
         versionName = "1.0.0"
@@ -21,9 +21,28 @@ android {
         }
     }
 
+    signingConfigs {
+        getByName("debug") {
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+        create("release") {
+            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
